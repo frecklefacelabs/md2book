@@ -20,6 +20,9 @@ from pathlib import Path
 import yaml
 import markdown
 
+
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # CSS — embedded in the output HTML (minified-ish but readable for editing)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -81,19 +84,19 @@ body {
 /* Interior headings */
 .page:not(.cover) h1 {
   font-family: var(--font-body);
-  font-size: 0.65rem;
+  font-size: 1.0rem;
   font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--color-accent);
-  margin-bottom: 0.2in;
+  margin-bottom: 0.12in;
 }
 .page:not(.cover) h2 {
   font-family: var(--font-heading);
-  font-size: 1.75rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--color-heading);
-  line-height: 1.2;
+  line-height: 1.0;
   margin-bottom: 0.12in;
 }
 .page:not(.cover) h3 {
@@ -138,15 +141,30 @@ body {
   text-align: justify;
   hyphens: auto;
 }
-.page:not(.cover) p:first-of-type::first-letter {
+/* Extra bottom margin on first paragraph to clear space below the drop cap */
+.page:not(.cover) > p:first-of-type {
+  margin-bottom: 0.25in;
+}
+.page:not(.cover) > p:first-of-type::first-letter {
   font-family: var(--font-heading);
   font-size: 3.2rem;
   font-weight: 700;
   color: var(--color-accent);
   float: left;
   line-height: 0.8;
-  margin-right: 0.06in;
+  margin-right: 0.03in;
   margin-top: 0.04in;
+}
+/* Clear drop cap float for everything that follows the first paragraph */
+.page:not(.cover) p + p,
+.page:not(.cover) p + h4,
+.page:not(.cover) p + h5,
+.page:not(.cover) p + ul,
+.page:not(.cover) p + ol,
+.page:not(.cover) p + blockquote,
+.page:not(.cover) p + pre,
+.page:not(.cover) p + hr {
+  clear: both;
 }
 .page:not(.cover) blockquote {
   border-left: 3px solid var(--color-rule);
@@ -167,6 +185,151 @@ body {
 }
 .page:not(.cover) li { margin-bottom: 0.05in; }
 
+/* Fix: markdown sometimes wraps li content in <p> tags — keep them tight */
+.page:not(.cover) li p {
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   ADMONITION BOXES  (!!! tip / warning / note / important / example)
+   ============================================================ */
+.page:not(.cover) .admonition {
+  border-radius: 3px;
+  margin: 0.18in 0;
+  padding: 0.12in 0.15in 0.12in 0.5in;
+  position: relative;
+  clear: both;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+/* Icon — injected via ::before on the title */
+.page:not(.cover) .admonition-title {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.05in;
+  padding-left: 0;
+}
+.page:not(.cover) .admonition-title::before {
+  position: absolute;
+  left: 0.12in;
+  top: 0.1in;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.page:not(.cover) .admonition p {
+  margin-bottom: 0.06in;
+  font-size: 0.85rem;
+  text-align: left;
+  hyphens: none;
+}
+.page:not(.cover) .admonition p:last-child {
+  margin-bottom: 0;
+}
+/* Kill drop cap inside admonitions */
+.page:not(.cover) .admonition p::first-letter {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  float: none;
+  line-height: inherit;
+  margin: 0;
+}
+
+/* tip — green */
+.page:not(.cover) .admonition.tip {
+  background: #f0f7f0;
+  border-left: 3px solid #5a9e5a;
+}
+.page:not(.cover) .admonition.tip .admonition-title {
+  color: #3a7a3a;
+}
+.page:not(.cover) .admonition.tip .admonition-title::before {
+  content: '💡';
+}
+
+/* warning — amber */
+.page:not(.cover) .admonition.warning {
+  background: #fdf7ed;
+  border-left: 3px solid #d4940a;
+}
+.page:not(.cover) .admonition.warning .admonition-title {
+  color: #a06d00;
+}
+.page:not(.cover) .admonition.warning .admonition-title::before {
+  content: '⚠️';
+}
+
+/* note — blue */
+.page:not(.cover) .admonition.note {
+  background: #f0f4fa;
+  border-left: 3px solid #5a7ec0;
+}
+.page:not(.cover) .admonition.note .admonition-title {
+  color: #3a5ea0;
+}
+.page:not(.cover) .admonition.note .admonition-title::before {
+  content: '📝';
+}
+
+/* important — red */
+.page:not(.cover) .admonition.important {
+  background: #fdf0f0;
+  border-left: 3px solid #c05a5a;
+}
+.page:not(.cover) .admonition.important .admonition-title {
+  color: #a03a3a;
+}
+.page:not(.cover) .admonition.important .admonition-title::before {
+  content: '❗';
+}
+
+/* example — purple */
+.page:not(.cover) .admonition.example {
+  background: #f5f0fa;
+  border-left: 3px solid #8a5ac0;
+}
+.page:not(.cover) .admonition.example .admonition-title {
+  color: #6a3aa0;
+}
+.page:not(.cover) .admonition.example .admonition-title::before {
+  content: '🔍';
+}
+
+/* Tables */
+.page:not(.cover) table {
+  width: 100%%;
+  border-collapse: collapse;
+  margin-bottom: 0.18in;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.page:not(.cover) thead {
+  background: var(--color-accent);
+}
+.page:not(.cover) thead th {
+  color: #fffdf8;
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: 0.06in 0.1in;
+  border: none;
+}
+.page:not(.cover) tbody tr:nth-child(even) {
+  background: #f0ebe3;
+}
+.page:not(.cover) tbody tr:nth-child(odd) {
+  background: #fffdf8;
+}
+.page:not(.cover) tbody td {
+  color: var(--color-text);
+  padding: 0.05in 0.1in;
+  border-bottom: 1px solid #ddd5c8;
+}
+
 /* Inline code */
 .page:not(.cover) code {
   font-family: 'Courier New', Courier, monospace;
@@ -180,10 +343,11 @@ body {
 
 /* Code blocks */
 .page:not(.cover) pre {
-  background: #1e1e1e;
+  background: #ede8df;
   border-left: 3px solid var(--color-accent);
   border-radius: 3px;
   padding: 0.15in 0.18in;
+  margin-top: 0.18in;
   margin-bottom: 0.18in;
   overflow: hidden;
 }
@@ -191,7 +355,7 @@ body {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.78rem;
   line-height: 1.6;
-  color: #d4d4d4;
+  color: #2a2118;
   background: none;
   border: none;
   padding: 0;
@@ -301,6 +465,71 @@ body {
   flex-shrink: 0;
 }
 
+  color: #e8d5b0;
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   IMAGES
+   Alt text convention: ![alignment-behavior-size](file.jpg)
+   alignment: left | right
+   behavior:  wrap (text flows around) | block (text follows below)
+   size:      integer percent of content width e.g. 30, 50, 100
+   Examples:
+     ![right-wrap-40](chart.jpg)   — 40%% wide, right, text wraps
+     ![left-block-50](photo.jpg)   — 50%% wide, left, text below
+     ![](diagram.jpg)              — 100%% wide, centered block (default)
+   ============================================================ */
+.page:not(.cover) img {
+  max-width: 100%%;
+  height: auto;
+  display: block;
+  margin: 0.15in auto 0.15in;
+}
+.page:not(.cover) img.right-wrap {
+  float: right;
+  margin: 0 0 0.12in 0.18in;
+  display: inline;
+}
+.page:not(.cover) img.left-wrap {
+  float: left;
+  margin: 0 0.18in 0.12in 0;
+  display: inline;
+}
+.page:not(.cover) img.right-block {
+  float: right;
+  clear: both;
+  margin: 0.12in 0 0.12in 0.18in;
+  display: inline;
+}
+.page:not(.cover) img.left-block {
+  float: left;
+  clear: both;
+  margin: 0.12in 0.18in 0.12in 0;
+  display: inline;
+}
+/* Clear floats after block images */
+.page:not(.cover) .img-block-clear { clear: both; }
+
+/* ============================================================
+   MATH (KaTeX server-side rendered)
+   Inline math stays in the text flow.
+   Block math is centered with vertical breathing room.
+   ============================================================ */
+.page:not(.cover) .math-inline .katex {
+  font-size: 1em;
+}
+.page:not(.cover) .math-block {
+  display: block;
+  text-align: center;
+  margin: 0.18in 0;
+  overflow: hidden;
+}
+.page:not(.cover) .math-block .katex {
+  font-size: 1.1em;
+}
+
 @media print {
   @page { size: 6in 9in; margin: 0; }
   body { background: none; padding: 0; gap: 0; }
@@ -319,11 +548,25 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>%(title)s</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
   <style>%(css)s</style>
 </head>
 <body>
 %(cover)s
 %(pages)s
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$",  right: "$",  display: false}
+      ],
+      throwOnError: false
+    });
+  });
+</script>
 </body>
 </html>"""
 
@@ -386,6 +629,87 @@ def load_image_as_data_uri(image_ref, base_dir=None):
 # Parsing
 # ─────────────────────────────────────────────────────────────────────────────
 
+def process_images(html, base_dir=None):
+    """
+    Post-process HTML to handle the image alt text convention.
+    Alt text format: alignment-behavior-size  e.g. "right-wrap-40"
+    Injects the correct class and width style onto each <img> tag.
+    Also base64-encodes local image src attributes.
+    """
+    def replace_img(match):
+        tag = match.group(0)
+
+        # ── Parse alt text for alignment/behavior/size ───────────────────────
+        alt_match = re.search(r'alt="([^"]*)"', tag)
+        alt = alt_match.group(1) if alt_match else ''
+        parts = alt.strip().lower().split('-')
+
+        css_class = ''
+        width_pct = None
+
+        if len(parts) >= 2 and parts[0] in ('left', 'right') and parts[1] in ('wrap', 'block'):
+            css_class = f"{parts[0]}-{parts[1]}"
+            if len(parts) >= 3 and parts[2].isdigit():
+                width_pct = parts[2]
+
+        # ── Base64-encode local src images ───────────────────────────────────
+        src_match = re.search(r'src="([^"]*)"', tag)
+        if src_match:
+            src = src_match.group(1)
+            if not src.startswith('http://') and not src.startswith('https://') \
+               and not src.startswith('data:'):
+                uri = load_image_as_data_uri(src, base_dir=base_dir)
+                if uri:
+                    tag = tag.replace(f'src="{src}"', f'src="{uri}"')
+
+        # ── Inject class and width ────────────────────────────────────────────
+        style = f'width:{width_pct}%%' if width_pct else 'width:100%%'
+        if css_class:
+            tag = re.sub(r'<img ', f'<img class="{css_class}" style="{style}" ', tag)
+        else:
+            # Default: full width centered block
+            tag = re.sub(r'<img ', f'<img style="{style}" ', tag)
+
+        # ── Add clear div after block images so text starts below ────────────
+        if css_class and 'block' in css_class:
+            tag += '<div class="img-block-clear"></div>'
+
+        return tag
+
+    return re.sub(r'<img [^>]+>', replace_img, html)
+
+
+def process_math(html):
+    """
+    Math is rendered client-side by KaTeX auto-render (loaded from CDN).
+    This function just ensures $...$ and $$...$$ delimiters are preserved
+    intact — the markdown library leaves them alone so nothing to do here.
+    We do wrap them in spans so CSS can style the containers consistently.
+    """
+    # Block math: $$...$$ — wrap in a div for centering
+    html = re.sub(
+        r'\$\$(.+?)\$\$',
+        lambda m: f'<div class="math-block">$${m.group(1)}$$</div>',
+        html,
+        flags=re.DOTALL
+    )
+    # Inline math: $...$ — wrap in a span
+    html = re.sub(
+        r'\$(.+?)\$',
+        lambda m: f'<span class="math-inline">${m.group(1)}$</span>',
+        html
+    )
+    return html
+
+
+def clean_escapes(text):
+    """Remove backslash escapes before non-Markdown characters.
+    Google Drive's markdown export is overly cautious and escapes characters
+    like = : > that have no special meaning in Markdown."""
+    markdown_specials = r'\*_{}[]()#+-.!|`'
+    return re.sub(r'\\([^' + re.escape(markdown_specials) + r'])', r'\1', text)
+
+
 def parse_front_matter(text):
     """Split YAML front matter from body. Returns (metadata_dict, body_str)."""
     if not text.startswith('---'):
@@ -407,12 +731,22 @@ def split_pages(body):
     return [p.strip() for p in raw if p.strip()]
 
 
-def md_to_html(md_text):
+def md_to_html(md_text, base_dir=None):
     """Convert a markdown string to an HTML fragment."""
-    return markdown.markdown(
+    import re
+    html = markdown.markdown(
         md_text,
-        extensions=['extra', 'sane_lists']
+        extensions=['extra', 'sane_lists', 'admonition']
     )
+    # Strip trailing whitespace inside <pre><code> blocks —
+    # the markdown library adds a trailing newline that renders as extra padding
+    html = re.sub(r'\s+</code></pre>', '</code></pre>', html)
+    # Process images: inject classes, width, and base64-encode local files
+    html = process_images(html, base_dir=base_dir)
+    # Process math: render $...$ and $$...$$ via KaTeX
+    html = process_math(html)
+    return html
+    return html
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -443,13 +777,25 @@ def build_cover(meta, overrides, image_uri=None):
   </div>"""
 
 
-def build_pages(pages):
+def build_pages(pages, base_dir=None):
     """Convert each markdown page chunk to a styled HTML page div."""
     html_pages = []
     for i, page_md in enumerate(pages, start=1):
-        content = md_to_html(page_md)
-        # Indent content for readability
-        indented = '\n'.join('    ' + line for line in content.splitlines())
+        content = md_to_html(page_md, base_dir=base_dir)
+        # Indent content for readability, but skip lines inside <pre> blocks
+        # to avoid adding spurious whitespace that corrupts code indentation
+        indented_lines = []
+        in_pre = False
+        for line in content.splitlines():
+            if '<pre>' in line:
+                in_pre = True
+            if in_pre:
+                indented_lines.append(line)
+            else:
+                indented_lines.append('    ' + line)
+            if '</pre>' in line:
+                in_pre = False
+        indented = '\n'.join(indented_lines)
         html_pages.append(PAGE_TEMPLATE % {
             'content':  indented,
             'page_num': i,
@@ -504,6 +850,7 @@ def main():
         sys.exit(1)
 
     source = input_path.read_text(encoding='utf-8')
+    source = clean_escapes(source)
 
     # ── Parse ────────────────────────────────────────────────────────────────
     meta, body = parse_front_matter(source)
@@ -528,7 +875,7 @@ def main():
 
     # ── Build ────────────────────────────────────────────────────────────────
     cover_html = build_cover(meta, overrides, image_uri=image_uri)
-    pages_html = build_pages(pages)
+    pages_html = build_pages(pages, base_dir=input_path.parent)
     html       = build_html(meta, cover_html, pages_html, overrides)
 
     # ── Write output ─────────────────────────────────────────────────────────

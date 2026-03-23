@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Quiet Art of Doing Less</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  --page-width:    6in;
+  --page-height:   9in;
+  --color-bg:      #fffdf8;
+  --color-text:    #2a2118;
+  --color-heading: #1a1208;
+  --color-accent:  #8b4513;
+  --color-rule:    #c8a97e;
+  --font-heading:  'Playfair Display', Georgia, serif;
+  --font-body:     'Lora', Georgia, serif;
+  --margin-outer:  0.75in;
+  --margin-inner:  0.875in;
+  --margin-top:    0.75in;
+  --margin-bottom: 0.75in;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #d4cfc8;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding: 40px 20px;
+}
+
+.page {
+  width: var(--page-width);
+  height: var(--page-height);
+  background: var(--color-bg);
+  overflow: hidden;
+  position: relative;
+  padding: var(--margin-top) var(--margin-outer) var(--margin-bottom) var(--margin-inner);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10);
+}
+
+.page:not(.cover)::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0.45in;
+  left: var(--margin-inner);
+  right: var(--margin-outer);
+  height: 1px;
+  background: linear-gradient(to right, var(--color-rule), transparent);
+  opacity: 0.5;
+}
+
+/* Interior headings */
+.page:not(.cover) h1 {
+  font-family: var(--font-body);
+  font-size: 1.0rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 0.12in;
+}
+.page:not(.cover) h2 {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  line-height: 1.0;
+  margin-bottom: 0.12in;
+}
+.page:not(.cover) h3 {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1rem;
+  color: var(--color-accent);
+  margin-bottom: 0.25in;
+}
+.page:not(.cover) h4 {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  letter-spacing: 0.03em;
+  margin-top: 0.2in;
+  margin-bottom: 0.1in;
+}
+.page:not(.cover) h5 {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--color-accent);
+  margin-top: 0.15in;
+  margin-bottom: 0.08in;
+}
+.page:not(.cover) hr {
+  width: 1.5in;
+  height: 2px;
+  background: linear-gradient(to right, var(--color-accent), transparent);
+  margin-bottom: 0.3in;
+  border: none;
+}
+.page:not(.cover) p {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.75;
+  color: var(--color-text);
+  margin-bottom: 0.18in;
+  text-align: justify;
+  hyphens: auto;
+}
+/* Extra bottom margin on first paragraph to clear space below the drop cap */
+.page:not(.cover) > p:first-of-type {
+  margin-bottom: 0.25in;
+}
+.page:not(.cover) > p:first-of-type::first-letter {
+  font-family: var(--font-heading);
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  float: left;
+  line-height: 0.8;
+  margin-right: 0.03in;
+  margin-top: 0.04in;
+}
+/* Clear drop cap float for everything that follows the first paragraph */
+.page:not(.cover) p + p,
+.page:not(.cover) p + h4,
+.page:not(.cover) p + h5,
+.page:not(.cover) p + ul,
+.page:not(.cover) p + ol,
+.page:not(.cover) p + blockquote,
+.page:not(.cover) p + pre,
+.page:not(.cover) p + hr {
+  clear: both;
+}
+.page:not(.cover) blockquote {
+  border-left: 3px solid var(--color-rule);
+  margin: 0.2in 0 0.2in 0.2in;
+  padding-left: 0.15in;
+  font-style: italic;
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.page:not(.cover) ul,
+.page:not(.cover) ol {
+  font-size: 0.875rem;
+  line-height: 1.75;
+  color: var(--color-text);
+  margin-bottom: 0.18in;
+  padding-left: 0.25in;
+}
+.page:not(.cover) li { margin-bottom: 0.05in; }
+
+/* Fix: markdown sometimes wraps li content in <p> tags — keep them tight */
+.page:not(.cover) li p {
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   ADMONITION BOXES  (!!! tip / warning / note / important / example)
+   ============================================================ */
+.page:not(.cover) .admonition {
+  border-radius: 3px;
+  margin: 0.18in 0;
+  padding: 0.12in 0.15in 0.12in 0.5in;
+  position: relative;
+  clear: both;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+/* Icon — injected via ::before on the title */
+.page:not(.cover) .admonition-title {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.05in;
+  padding-left: 0;
+}
+.page:not(.cover) .admonition-title::before {
+  position: absolute;
+  left: 0.12in;
+  top: 0.1in;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.page:not(.cover) .admonition p {
+  margin-bottom: 0.06in;
+  font-size: 0.85rem;
+  text-align: left;
+  hyphens: none;
+}
+.page:not(.cover) .admonition p:last-child {
+  margin-bottom: 0;
+}
+/* Kill drop cap inside admonitions */
+.page:not(.cover) .admonition p::first-letter {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  float: none;
+  line-height: inherit;
+  margin: 0;
+}
+
+/* tip — green */
+.page:not(.cover) .admonition.tip {
+  background: #f0f7f0;
+  border-left: 3px solid #5a9e5a;
+}
+.page:not(.cover) .admonition.tip .admonition-title {
+  color: #3a7a3a;
+}
+.page:not(.cover) .admonition.tip .admonition-title::before {
+  content: '💡';
+}
+
+/* warning — amber */
+.page:not(.cover) .admonition.warning {
+  background: #fdf7ed;
+  border-left: 3px solid #d4940a;
+}
+.page:not(.cover) .admonition.warning .admonition-title {
+  color: #a06d00;
+}
+.page:not(.cover) .admonition.warning .admonition-title::before {
+  content: '⚠️';
+}
+
+/* note — blue */
+.page:not(.cover) .admonition.note {
+  background: #f0f4fa;
+  border-left: 3px solid #5a7ec0;
+}
+.page:not(.cover) .admonition.note .admonition-title {
+  color: #3a5ea0;
+}
+.page:not(.cover) .admonition.note .admonition-title::before {
+  content: '📝';
+}
+
+/* important — red */
+.page:not(.cover) .admonition.important {
+  background: #fdf0f0;
+  border-left: 3px solid #c05a5a;
+}
+.page:not(.cover) .admonition.important .admonition-title {
+  color: #a03a3a;
+}
+.page:not(.cover) .admonition.important .admonition-title::before {
+  content: '❗';
+}
+
+/* example — purple */
+.page:not(.cover) .admonition.example {
+  background: #f5f0fa;
+  border-left: 3px solid #8a5ac0;
+}
+.page:not(.cover) .admonition.example .admonition-title {
+  color: #6a3aa0;
+}
+.page:not(.cover) .admonition.example .admonition-title::before {
+  content: '🔍';
+}
+
+/* Tables */
+.page:not(.cover) table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.18in;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.page:not(.cover) thead {
+  background: var(--color-accent);
+}
+.page:not(.cover) thead th {
+  color: #fffdf8;
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: 0.06in 0.1in;
+  border: none;
+}
+.page:not(.cover) tbody tr:nth-child(even) {
+  background: #f0ebe3;
+}
+.page:not(.cover) tbody tr:nth-child(odd) {
+  background: #fffdf8;
+}
+.page:not(.cover) tbody td {
+  color: var(--color-text);
+  padding: 0.05in 0.1in;
+  border-bottom: 1px solid #ddd5c8;
+}
+
+/* Inline code */
+.page:not(.cover) code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.8rem;
+  background: #f0ebe3;
+  color: #8b4513;
+  padding: 0.01in 0.05in;
+  border-radius: 2px;
+  border: 1px solid #ddd5c8;
+}
+
+/* Code blocks */
+.page:not(.cover) pre {
+  background: #ede8df;
+  border-left: 3px solid var(--color-accent);
+  border-radius: 3px;
+  padding: 0.15in 0.18in;
+  margin-top: 0.18in;
+  margin-bottom: 0.18in;
+  overflow: hidden;
+}
+.page:not(.cover) pre code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: #2a2118;
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  display: block;
+  white-space: pre;
+}
+
+.page-number {
+  position: absolute;
+  bottom: 0.45in;
+  left: var(--margin-inner);
+  width: calc(var(--page-width) - var(--margin-outer) - var(--margin-inner));
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  color: var(--color-rule);
+  letter-spacing: 0.1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.page-number::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-rule);
+  margin-right: 0.15in;
+  opacity: 0.5;
+}
+
+/* Cover */
+.cover {
+  background-color: #1a120a;
+  background-size: cover;
+  background-position: center center;
+  padding: 0.75in;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
+}
+/* Gradient scrim — dark at top and bottom, clear in the middle */
+.cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.75) 0%,
+    rgba(0,0,0,0.0)  40%,
+    rgba(0,0,0,0.0)  60%,
+    rgba(0,0,0,0.65) 100%
+  );
+  z-index: 0;
+}
+
+/* All direct children of .cover sit above the scrim */
+.cover > * { position: relative; z-index: 1; }
+
+.cover h1 {
+  font-family: var(--font-heading);
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #f5e6c8;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  margin-bottom: 0.18in;
+}
+.cover h2 {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.05rem;
+  color: #e8d5b0;
+  line-height: 1.4;
+  margin-bottom: 0.35in;
+  letter-spacing: 0.02em;
+}
+.cover .divider {
+  width: 0.6in;
+  height: 2px;
+  background: #c8a97e;
+  margin: 0 auto 0.35in;
+  flex-shrink: 0;
+}
+.cover .spacer { flex: 1; }
+.cover .blurb {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: #e0cba8;
+  line-height: 1.7;
+  max-width: 3.8in;
+  text-align: center;
+  margin-bottom: 0.25in;
+  flex-shrink: 0;
+}
+.cover .author {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #e8d5b0;
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+
+  color: #e8d5b0;
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   IMAGES
+   Alt text convention: ![alignment-behavior-size](file.jpg)
+   alignment: left | right
+   behavior:  wrap (text flows around) | block (text follows below)
+   size:      integer percent of content width e.g. 30, 50, 100
+   Examples:
+     ![right-wrap-40](chart.jpg)   — 40% wide, right, text wraps
+     ![left-block-50](photo.jpg)   — 50% wide, left, text below
+     ![](diagram.jpg)              — 100% wide, centered block (default)
+   ============================================================ */
+.page:not(.cover) img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0.15in auto 0.15in;
+}
+.page:not(.cover) img.right-wrap {
+  float: right;
+  margin: 0 0 0.12in 0.18in;
+  display: inline;
+}
+.page:not(.cover) img.left-wrap {
+  float: left;
+  margin: 0 0.18in 0.12in 0;
+  display: inline;
+}
+.page:not(.cover) img.right-block {
+  float: right;
+  clear: both;
+  margin: 0.12in 0 0.12in 0.18in;
+  display: inline;
+}
+.page:not(.cover) img.left-block {
+  float: left;
+  clear: both;
+  margin: 0.12in 0.18in 0.12in 0;
+  display: inline;
+}
+/* Clear floats after block images */
+.page:not(.cover) .img-block-clear { clear: both; }
+
+/* ============================================================
+   MATH (KaTeX server-side rendered)
+   Inline math stays in the text flow.
+   Block math is centered with vertical breathing room.
+   ============================================================ */
+.page:not(.cover) .math-inline .katex {
+  font-size: 1em;
+}
+.page:not(.cover) .math-block {
+  display: block;
+  text-align: center;
+  margin: 0.18in 0;
+  overflow: hidden;
+}
+.page:not(.cover) .math-block .katex {
+  font-size: 1.1em;
+}
+
+@media print {
+  @page { size: 6in 9in; margin: 0; }
+  body { background: none; padding: 0; gap: 0; }
+  .page { box-shadow: none; break-after: page; page-break-after: always; }
+  .page:last-child { break-after: avoid; page-break-after: avoid; }
+}
+</style>
+</head>
+<body>
+  <div class="page cover">
+    <h1>The Quiet Art of Doing Less</h1>
+    <h2>A practical guide to simplifying your work, reclaiming your time, and achieving more</h2>
+    <div class="divider"></div>
+    <div class="spacer"></div>
+    <p class="blurb">Most of us are drowning in busyness while starving for results. This book shows you a different way — one small, deliberate choice at a time.</p>
+    <span class="author">Morgan Elaine Harlow</span>
+  </div>
+  <div class="page">
+    <h1>Chapter One</h1>
+    <h2>The Art of Beginning</h2>
+    <h3>Where every great journey finds its first step</h3>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.</p>
+    <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Curabitur blandit tempus porttitor. Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+    <p>Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Nulla vitae elit libero, a pharetra augue. Maecenas faucibus mollis interdum.</p>
+    <div class="page-number"><span>1</span></div>
+  </div>
+  <div class="page">
+    <h1>Chapter Two</h1>
+    <h2>Momentum &amp; Motion</h2>
+    <h3>Finding the rhythm beneath everything</h3>
+    <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam.</p>
+    <p>Etiam porta sem malesuada magna mollis euismod. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Curabitur blandit tempus porttitor. Sed posuere consectetur est at lobortis.</p>
+    <h4>A Section Header Example</h4>
+    <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Aenean lacinia bibendum nulla sed consectetur. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
+    <div class="page-number"><span>2</span></div>
+  </div>
+  <div class="page">
+    <h1>Chapter Three</h1>
+    <h2>The Shape of Things</h2>
+    <h3>Patterns hidden in plain sight</h3>
+    <p>Maecenas sed diam eget risus varius blandit sit amet non magna. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Donec id elit non mi porta gravida at eget metus.</p>
+    <h4>Another Section Header</h4>
+    <h5>And a Sub-section if Needed</h5>
+    <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum.</p>
+    <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Etiam porta sem malesuada magna mollis euismod.</p>
+    <h4>A Quick Code Example</h4>
+    <p>Here is a table of Python data types:</p>
+    <table>
+    <thead>
+    <tr>
+    <th>Type</th>
+    <th>Example</th>
+    <th>Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>int</td>
+    <td>42</td>
+    <td>Whole numbers</td>
+    </tr>
+    <tr>
+    <td>float</td>
+    <td>3.14</td>
+    <td>Decimal numbers</td>
+    </tr>
+    <tr>
+    <td>str</td>
+    <td>"hello"</td>
+    <td>Text</td>
+    </tr>
+    <tr>
+    <td>bool</td>
+    <td>True</td>
+    <td>True or False</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>Here is an inline reference to the <code>print()</code> function, which is one of
+    the first things you will learn in Python.</p>
+<pre><code class="language-python">def greet(name):
+    message = f&quot;Hello, {name}!&quot;
+    print(message)
+
+greet(&quot;Freckleface&quot;)</code></pre>
+    <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.</p>
+    <div class="page-number"><span>3</span></div>
+  </div>
+  <div class="page">
+    <h1>Chapter Four</h1>
+    <h2>Images in Action</h2>
+    <h3>Testing alignment and wrapping</h3>
+    <p>This paragraph appears before an image that is right-aligned with text
+    wrapping around it. The image is set to 40% width.</p>
+    <p><img class="right-wrap" style="width:40%%" alt="right-wrap-40" src="images/sample.jpg" /></p>
+    <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+    Curabitur blandit tempus porttitor. Nullam quis risus eget urna mollis
+    ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient
+    montes, nascetur ridiculus mus. Donec sed odio dui.</p>
+    <h4>Left-aligned block image</h4>
+    <p>This image is left-aligned at 50% width, with text following below rather
+    than wrapping around it.</p>
+    <p><img class="left-block" style="width:50%%" alt="left-block-50" src="images/sample.jpg" /><div class="img-block-clear"></div></p>
+    <p>This sentence appears below the image, not beside it.</p>
+    <h4>Full width image</h4>
+    <p>This image takes up the full content width with no alignment specified.</p>
+    <p><img style="width:100%%" alt="" src="images/sample.jpg" /></p>
+    <div class="page-number"><span>4</span></div>
+  </div>
+  <div class="page">
+    <h1>Chapter Five</h1>
+    <h2>Math Formulas</h2>
+    <h3>Testing KaTeX rendering</h3>
+    <p>Here is an inline formula: the famous equation <span class="math-inline">$E = mc^2$</span> appears right
+    in the middle of a sentence without disrupting the text flow.</p>
+    <p>The quadratic formula, also inline, looks like this: <span class="math-inline">$x = frac{-b pm sqrt{b^2 - 4ac}}{2a}$</span>.</p>
+    <h4>Block formulas</h4>
+    <p>A block formula is centered on its own line with breathing room above and
+    below. Here is the Pythagorean theorem:</p>
+    <p><div class="math-block">$$
+    a^2 + b^2 = c^2
+    $$</div></p>
+    <p>And here is a more complex example — the definition of a derivative:</p>
+    <p><div class="math-block">$$
+    f'(x) = lim_{h to 0} frac{f(x+h) - f(x)}{h}
+    $$</div></p>
+    <p>And a summation formula:</p>
+    <p><div class="math-block">$$
+    sum_{i=1}^{n} i = frac{n(n+1)}{2}
+    $$</div></p>
+    <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.</p>
+    <div class="page-number"><span>5</span></div>
+  </div>
+  <div class="page">
+    <h1>Chapter Six</h1>
+    <h2>Callout Boxes</h2>
+    <h3>Tips, warnings, notes and more</h3>
+    <p>Here is some regular text before a tip box. The boxes should stand out
+    clearly from the body text while still feeling part of the page design.</p>
+    <div class="admonition tip">
+    <p class="admonition-title">Pro Tip</p>
+    <p>Always name your variables clearly. A name like <code>user_age</code> is far
+    more readable than <code>x</code> or <code>temp1</code>.</p>
+    </div>
+    <div class="admonition warning">
+    <p class="admonition-title">Warning</p>
+    <p>Never use a bare <code>except:</code> clause in Python. It will silently catch
+    errors you didn't intend to catch, making bugs very hard to find.</p>
+    </div>
+    <div class="admonition note">
+    <p class="admonition-title">Remember</p>
+    <p>Python uses indentation to define code blocks. Consistent indentation
+    is not just style — it is syntax.</p>
+    </div>
+    <div class="admonition important">
+    <p class="admonition-title">Don't Skip This</p>
+    <p>Save your work before running any script that modifies files. There
+    is no undo in the terminal.</p>
+    </div>
+    <div class="admonition example">
+    <p class="admonition-title">Worked Example</p>
+    <p>Given <code>x = 5</code> and <code>y = 3</code>, the expression <code>x ** y</code> evaluates to
+    125, because 5 raised to the power of 3 is 125.</p>
+    </div>
+    <p>Regular text resumes here after the callout boxes.</p>
+    <div class="page-number"><span>6</span></div>
+  </div>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$",  right: "$",  display: false}
+      ],
+      throwOnError: false
+    });
+  });
+</script>
+</body>
+</html>
