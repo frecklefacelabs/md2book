@@ -4,9 +4,44 @@ Live preview for md2book. Edit your Markdown book and see it rendered as a beaut
 
 ## Features
 
-- **Toolbar button** appears when editing any `.md` file, or use the Command Palette: "md2book: Open Book Preview"
+- **Toolbar buttons** appear when editing any `.md` file:
+  - **Preview** — opens a live book preview panel (or use Command Palette: "md2book: Open Book Preview")
+  - **Export to Browser** — opens the rendered book in your default browser for print-to-PDF (Ctrl+P)
 - **Debounced auto-refresh** — preview updates ~1 second after you stop typing
 - **Self-contained** — no Python or external dependencies needed at runtime
+
+## Markdown Directives
+
+### Page breaks
+
+Use an `# ` heading to start a new page (the heading becomes the page title), or use a comment for a page break without a heading:
+
+```markdown
+<!-- pagebreak -->
+```
+
+### Disable drop cap
+
+By default, the first paragraph on each page gets a decorative drop cap. To disable it for a specific page, add this comment before the first paragraph:
+
+```markdown
+# Some Chapter
+<!-- no-drop-cap -->
+
+This paragraph will start normally.
+```
+
+### Image placement
+
+Control image alignment, float behavior, and size via alt text:
+
+```markdown
+![right-wrap-40](photo.jpg)   — 40% wide, right-aligned, text wraps
+![left-block-50](chart.jpg)   — 50% wide, left-aligned, text below
+![](diagram.jpg)              — 100% wide, centered (default)
+```
+
+Format: `![alignment-behavior-size](file)` where alignment is `left`/`right`, behavior is `wrap`/`block`, and size is a width percentage.
 
 ## Settings
 
