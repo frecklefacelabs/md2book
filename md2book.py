@@ -465,11 +465,6 @@ body {
   flex-shrink: 0;
 }
 
-  color: #e8d5b0;
-  align-self: flex-end;
-  flex-shrink: 0;
-}
-
 /* ============================================================
    IMAGES
    Alt text convention: ![alignment-behavior-size](file.jpg)
@@ -745,7 +740,6 @@ def md_to_html(md_text, base_dir=None):
     html = process_images(html, base_dir=base_dir)
     # Process math: render $...$ and $$...$$ via KaTeX
     html = process_math(html)
-    return html
     return html
 
 

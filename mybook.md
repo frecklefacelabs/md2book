@@ -3,7 +3,7 @@ title: The Quiet Art of Doing Less
 subtitle: A practical guide to simplifying your work, reclaiming your time, and achieving more
 blurb: Most of us are drowning in busyness while starving for results. This book shows you a different way — one small, deliberate choice at a time.
 author: Morgan Elaine Harlow
-cover_image: images/cover.jpg
+cover_image: images/cover.png
 ---
 
 # Chapter One
@@ -42,6 +42,10 @@ Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis moll
 
 Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Etiam porta sem malesuada magna mollis euismod.
 
+# Chapter Three.1
+## The Shape of Things
+### Patterns hidden in plain sight
+
 #### A Quick Code Example
 
 Here is a table of Python data types:
@@ -73,27 +77,50 @@ Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.
 This paragraph appears before an image that is right-aligned with text
 wrapping around it. The image is set to 40% width.
 
-![right-wrap-40](images/sample.jpg)
-
-Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
-Curabitur blandit tempus porttitor. Nullam quis risus eget urna mollis
-ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient
-montes, nascetur ridiculus mus. Donec sed odio dui.
+![right-wrap-40](images/image1.png) Note that to wrap text, you must put the text on the same line as the image, and then supply one of the styles. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. 
 
 #### Left-aligned block image
 
 This image is left-aligned at 50% width, with text following below rather
 than wrapping around it.
 
-![left-block-50](images/sample.jpg)
+![left-block-50](images/image1.png)
 
 This sentence appears below the image, not beside it.
 
+# Chapter Four.1
+## Images in Action
+### Testing alignment and wrapping
 #### Full width image
 
 This image takes up the full content width with no alignment specified.
 
-![](images/sample.jpg)
+![](images/image1.png)
+
+# Chapter Four.2
+## Images in Action
+### Testing alignment and wrapping
+#### Style names
+
+For the CSS and image processing logic, the format is
+`![alignment-behavior-size](<image filename>)`
+
+* Alignments: left right
+* Behaviors: wrap (text flows around), block (text starts below)
+* Size: any integer (percent of content width)
+
+| Text               | Effect                              |
+|--------------------|-------------------------------------|
+|left-wrap-30        | 30% wide, left, text wraps around   |
+| left-wrap-50       | 50% wide, left, text wraps around   |
+| right-wrap-30      | 30% wide, right, text wraps around  |
+| right-wrap-50      | 50% wide, right, text wraps around  |
+| left-block-50      | 50% wide, left, text below          |
+| right-block-50     | 50% wide, right, text below         |
+| (empty or omitted) | 100% wide, centered block (default) |
+
+
+
 
 # Chapter Five
 ## Math Formulas
@@ -108,23 +135,19 @@ The quadratic formula, also inline, looks like this: $x = \frac{-b \pm \sqrt{b^2
 
 A block formula is centered on its own line with breathing room above and
 below. Here is the Pythagorean theorem:
-
 $$
 a^2 + b^2 = c^2
 $$
 
 And here is a more complex example — the definition of a derivative:
-
 $$
 f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}
 $$
 
 And a summation formula:
-
 $$
 \sum_{i=1}^{n} i = \frac{n(n+1)}{2}
 $$
-
 Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.
 
 # Chapter Six
@@ -145,6 +168,12 @@ clearly from the body text while still feeling part of the page design.
 !!! note "Remember"
     Python uses indentation to define code blocks. Consistent indentation
     is not just style — it is syntax.
+
+# Chapter Six.1
+## Callout Boxes
+### Tips, warnings, notes and more
+
+Continuing...
 
 !!! important "Don't Skip This"
     Save your work before running any script that modifies files. There

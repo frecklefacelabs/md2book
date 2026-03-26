@@ -1,0 +1,79 @@
+{
+  "name": "md2book-preview",
+  "displayName": "md2book Preview",
+  "description": "Live preview for md2book — see your Markdown rendered as a beautiful book.",
+  "version": "0.0.1",
+  "publisher": "freckleface",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frecklefacelabs/md2book.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "md2book.openPreview",
+        "title": "md2book: Open Book Preview",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "md2book.exportToBrowser",
+        "title": "md2book: Export to Browser",
+        "icon": "$(browser)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId == markdown",
+          "command": "md2book.openPreview",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceLangId == markdown",
+          "command": "md2book.exportToBrowser",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "md2book",
+      "properties": {
+        "md2book.debounceDelay": {
+          "type": "number",
+          "default": 1000,
+          "description": "Delay in ms after the last keystroke before auto-refreshing the preview."
+        },
+        "md2book.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refresh preview when the document changes."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npx @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "markdown-it": "^14.1.1",
+    "markdown-it-admon": "^1.0.1"
+  }
+}
