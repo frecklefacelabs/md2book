@@ -42,11 +42,7 @@ Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis moll
 
 Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Etiam porta sem malesuada magna mollis euismod.
 
-# Chapter Three.1
-## The Shape of Things
-### Patterns hidden in plain sight
-
-#### A Quick Code Example
+<!-- pagebreak --> 
 
 Here is a table of Python data types:
 
@@ -88,18 +84,16 @@ than wrapping around it.
 
 This sentence appears below the image, not beside it.
 
-# Chapter Four.1
-## Images in Action
-### Testing alignment and wrapping
+<!-- pagebreak -->
 #### Full width image
 
 This image takes up the full content width with no alignment specified.
 
 ![](images/image1.png)
 
-# Chapter Four.2
-## Images in Action
-### Testing alignment and wrapping
+<!-- pagebreak -->
+<!-- no-drop-cap -->
+
 #### Style names
 
 For the CSS and image processing logic, the format is
@@ -169,11 +163,8 @@ clearly from the body text while still feeling part of the page design.
     Python uses indentation to define code blocks. Consistent indentation
     is not just style — it is syntax.
 
-# Chapter Six.1
-## Callout Boxes
-### Tips, warnings, notes and more
-
-Continuing...
+<!-- pagebreak -->
+<!-- no-drop-cap -->
 
 !!! important "Don't Skip This"
     Save your work before running any script that modifies files. There

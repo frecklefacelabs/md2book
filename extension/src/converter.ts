@@ -165,6 +165,12 @@ body {
   margin-right: 0.03in;
   margin-top: 0.04in;
 }
+/* Disable drop cap when page has .no-drop-cap */
+.page.no-drop-cap > p:first-of-type { margin-bottom: 0.18in; }
+.page.no-drop-cap > p:first-of-type::first-letter {
+  font-size: inherit; font-weight: inherit; color: inherit;
+  float: none; line-height: inherit; margin: 0;
+}
 /* Clear drop cap float for everything that follows the first paragraph */
 .page:not(.cover) p + p,
 .page:not(.cover) p + h4,
@@ -680,6 +686,8 @@ function parseFrontMatter(text: string): { meta: BookMeta; body: string } {
 }
 
 function splitPages(body: string): string[] {
+  // Replace pagebreak comments with a sentinel heading so we can split uniformly
+  body = body.replace(/^<!--\s*pagebreak\s*-->/gm, "# ");
   // Split on lines starting with "# " (h1 headings)
   const raw = body.split(/(?=^# )/m);
   return raw.map((p) => p.trim()).filter((p) => p.length > 0);
@@ -731,6 +739,12 @@ function buildCover(
 function buildPages(pages: string[], baseDir?: string): string {
   return pages
     .map((pageMd, i) => {
+      // Check for <!-- no-drop-cap --> directive and strip it
+      const noDropCap = /<!--\s*no-drop-cap\s*-->/.test(pageMd);
+      if (noDropCap) {
+        pageMd = pageMd.replace(/<!--\s*no-drop-cap\s*-->\n?/g, "");
+      }
+
       const content = mdToHtml(pageMd, baseDir);
 
       // Indent content for readability, but skip lines inside <pre> blocks
@@ -742,7 +756,8 @@ function buildPages(pages: string[], baseDir?: string): string {
         if (line.includes("</pre>")) inPre = false;
       }
 
-      return `  <div class="page">
+      const pageClass = noDropCap ? "page no-drop-cap" : "page";
+      return `  <div class="${pageClass}">
 ${indentedLines.join("\n")}
     <div class="page-number"><span>${i + 1}</span></div>
   </div>`;

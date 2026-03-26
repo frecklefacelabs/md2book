@@ -155,6 +155,12 @@ body {
   margin-right: 0.03in;
   margin-top: 0.04in;
 }
+/* Disable drop cap when page has .no-drop-cap */
+.page.no-drop-cap > p:first-of-type { margin-bottom: 0.18in; }
+.page.no-drop-cap > p:first-of-type::first-letter {
+  font-size: inherit; font-weight: inherit; color: inherit;
+  float: none; line-height: inherit; margin: 0;
+}
 /* Clear drop cap float for everything that follows the first paragraph */
 .page:not(.cover) p + p,
 .page:not(.cover) p + h4,
@@ -720,7 +726,9 @@ def parse_front_matter(text):
 
 
 def split_pages(body):
-    """Split body markdown into pages wherever an h1 heading (# ) appears."""
+    """Split body markdown into pages on h1 headings (# ) or <!-- pagebreak -->."""
+    # Replace pagebreak comments with a sentinel heading so we can split uniformly
+    body = re.sub(r'^<!--\s*pagebreak\s*-->', '# ', body, flags=re.MULTILINE)
     # Look-ahead split: keep the delimiter (the # heading) with its page
     raw = re.split(r'(?=^# )', body, flags=re.MULTILINE)
     return [p.strip() for p in raw if p.strip()]
@@ -775,6 +783,11 @@ def build_pages(pages, base_dir=None):
     """Convert each markdown page chunk to a styled HTML page div."""
     html_pages = []
     for i, page_md in enumerate(pages, start=1):
+        # Check for <!-- no-drop-cap --> directive and strip it
+        no_drop_cap = bool(re.search(r'<!--\s*no-drop-cap\s*-->', page_md))
+        if no_drop_cap:
+            page_md = re.sub(r'<!--\s*no-drop-cap\s*-->\n?', '', page_md)
+
         content = md_to_html(page_md, base_dir=base_dir)
         # Indent content for readability, but skip lines inside <pre> blocks
         # to avoid adding spurious whitespace that corrupts code indentation
@@ -790,10 +803,9 @@ def build_pages(pages, base_dir=None):
             if '</pre>' in line:
                 in_pre = False
         indented = '\n'.join(indented_lines)
-        html_pages.append(PAGE_TEMPLATE % {
-            'content':  indented,
-            'page_num': i,
-        })
+        page_class = 'page no-drop-cap' if no_drop_cap else 'page'
+        html_pages.append('  <div class="%s">\n%s\n    <div class="page-number">'
+                          '<span>%d</span></div>\n  </div>' % (page_class, indented, i))
     return '\n'.join(html_pages)
 
 
