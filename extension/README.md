@@ -80,7 +80,37 @@ code --install-extension md2book-preview-0.0.1.vsix
 
 Or from inside VS Code: Command Palette → "Extensions: Install from VSIX..." and pick the file.
 
+!!! Tip
+    If building from within WSL, you'll need to copy the built extension over to the Windows drive. We recommend always copying it to the same place, as shown below.
+
+The first time:
+```
+mkdir /mnt/c/Users/jeffc/vsextensions
+```
+
+From then on:
+
+```
+cp md2book*.vsix /mnt/c/Users/jeffc/vsextensions/
+```
+
+And then to switch back to Windows to install:
+
+```
+code --install-extension \Users\jeffc\vsextensions\md2book-preview-0.0.1.vsix
+```
+
 Once installed, the `.vsix` file can be deleted — VS Code copies everything it needs into `~/.vscode/extensions/`.
+
+## Printing
+
+If Chrome's Print to PDF doesn't list 6x9, try using Chrome as a command line tool:
+
+```
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --headless --print-to-pdf="c:\users\jeffc\output.pdf" --print-to-pdf-no-header "file:///C:/Users/jeffc/AppData/Local/Temp/md2book-f74b4440.html"
+```
+
+(Grab the file:/// URL from the Chrome address bar. And for the output, replace your own username. Note that you MUST specifify the full path for the output.)
 
 ## Development
 
