@@ -155,12 +155,6 @@ body {
   margin-right: 0.03in;
   margin-top: 0.04in;
 }
-/* Disable drop cap when page has .no-drop-cap */
-.page.no-drop-cap > p:first-of-type { margin-bottom: 0.18in; }
-.page.no-drop-cap > p:first-of-type::first-letter {
-  font-size: inherit; font-weight: inherit; color: inherit;
-  float: none; line-height: inherit; margin: 0;
-}
 /* Clear drop cap float for everything that follows the first paragraph */
 .page:not(.cover) p + p,
 .page:not(.cover) p + h4,
@@ -471,6 +465,11 @@ body {
   flex-shrink: 0;
 }
 
+  color: #e8d5b0;
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+
 /* ============================================================
    IMAGES
    Alt text convention: ![alignment-behavior-size](file.jpg)
@@ -550,7 +549,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>%(title)s</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
-  <style>%(css)s</style>
+  <style>%(css)s</style>%(margin_css)s
 </head>
 <body>
 %(cover)s
@@ -726,9 +725,7 @@ def parse_front_matter(text):
 
 
 def split_pages(body):
-    """Split body markdown into pages on h1 headings (# ) or <!-- pagebreak -->."""
-    # Replace pagebreak comments with a sentinel heading so we can split uniformly
-    body = re.sub(r'^<!--\s*pagebreak\s*-->', '# ', body, flags=re.MULTILINE)
+    """Split body markdown into pages wherever an h1 heading (# ) appears."""
     # Look-ahead split: keep the delimiter (the # heading) with its page
     raw = re.split(r'(?=^# )', body, flags=re.MULTILINE)
     return [p.strip() for p in raw if p.strip()]
@@ -748,6 +745,7 @@ def md_to_html(md_text, base_dir=None):
     html = process_images(html, base_dir=base_dir)
     # Process math: render $...$ and $$...$$ via KaTeX
     html = process_math(html)
+    return html
     return html
 
 
@@ -783,11 +781,6 @@ def build_pages(pages, base_dir=None):
     """Convert each markdown page chunk to a styled HTML page div."""
     html_pages = []
     for i, page_md in enumerate(pages, start=1):
-        # Check for <!-- no-drop-cap --> directive and strip it
-        no_drop_cap = bool(re.search(r'<!--\s*no-drop-cap\s*-->', page_md))
-        if no_drop_cap:
-            page_md = re.sub(r'<!--\s*no-drop-cap\s*-->\n?', '', page_md)
-
         content = md_to_html(page_md, base_dir=base_dir)
         # Indent content for readability, but skip lines inside <pre> blocks
         # to avoid adding spurious whitespace that corrupts code indentation
@@ -803,9 +796,10 @@ def build_pages(pages, base_dir=None):
             if '</pre>' in line:
                 in_pre = False
         indented = '\n'.join(indented_lines)
-        page_class = 'page no-drop-cap' if no_drop_cap else 'page'
-        html_pages.append('  <div class="%s">\n%s\n    <div class="page-number">'
-                          '<span>%d</span></div>\n  </div>' % (page_class, indented, i))
+        html_pages.append(PAGE_TEMPLATE % {
+            'content':  indented,
+            'page_num': i,
+        })
     return '\n'.join(html_pages)
 
 
@@ -815,11 +809,29 @@ def build_html(meta, cover_html, pages_html, overrides):
     css = BOOK_CSS % {'accent_color': accent_color}
     title = overrides.get('title') or meta.get('title', 'Untitled')
 
+    # Build margin overrides — inject as a :root block if any are specified
+    margin_keys = {
+        'margin_top':    '--margin-top',
+        'margin_bottom': '--margin-bottom',
+        'margin_inner':  '--margin-inner',
+        'margin_outer':  '--margin-outer',
+    }
+    margin_overrides = []
+    for key, css_var in margin_keys.items():
+        val = overrides.get(key) or meta.get(key)
+        if val:
+            margin_overrides.append(f'  {css_var}: {val};')
+
+    margin_css = ''
+    if margin_overrides:
+        margin_css = '\n<style>\n:root {\n' + '\n'.join(margin_overrides) + '\n}\n</style>'
+
     return HTML_TEMPLATE % {
-        'title':  title,
-        'css':    css,
-        'cover':  cover_html,
-        'pages':  pages_html,
+        'title':       title,
+        'css':         css,
+        'margin_css':  margin_css,
+        'cover':       cover_html,
+        'pages':       pages_html,
     }
 
 
@@ -847,6 +859,14 @@ def main():
         help='Override the accent color (e.g. "#8b4513")')
     parser.add_argument('--cover-image',
         help='Override the cover image (local path or URL)')
+    parser.add_argument('--margin-top',
+        help='Override top margin (e.g. "0.75in")')
+    parser.add_argument('--margin-bottom',
+        help='Override bottom margin (e.g. "0.75in")')
+    parser.add_argument('--margin-inner',
+        help='Override inner (spine) margin (e.g. "0.875in")')
+    parser.add_argument('--margin-outer',
+        help='Override outer margin (e.g. "0.75in")')
     args = parser.parse_args()
 
     # ── Read input ──────────────────────────────────────────────────────────
@@ -867,12 +887,16 @@ def main():
 
     # ── CLI overrides ────────────────────────────────────────────────────────
     overrides = {k: v for k, v in {
-        'title':        args.title,
-        'subtitle':     args.subtitle,
-        'author':       args.author,
-        'blurb':        args.blurb,
-        'accent_color': args.accent_color,
-        'cover_image':  args.cover_image,
+        'title':         args.title,
+        'subtitle':      args.subtitle,
+        'author':        args.author,
+        'blurb':         args.blurb,
+        'accent_color':  args.accent_color,
+        'cover_image':   args.cover_image,
+        'margin_top':    args.margin_top,
+        'margin_bottom': args.margin_bottom,
+        'margin_inner':  args.margin_inner,
+        'margin_outer':  args.margin_outer,
     }.items() if v}
 
     # ── Load cover image (local file or URL) ────────────────────────────────

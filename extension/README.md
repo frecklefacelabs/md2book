@@ -94,7 +94,7 @@ From then on:
 cp md2book*.vsix /mnt/c/Users/jeffc/vsextensions/
 ```
 
-And then to switch back to Windows to install:
+And then to switch back to Windows to install. From a Windows command prompt:
 
 ```
 code --install-extension \Users\jeffc\vsextensions\md2book-preview-0.0.1.vsix
@@ -106,6 +106,7 @@ Once installed, the `.vsix` file can be deleted — VS Code copies everything it
 
 If Chrome's Print to PDF doesn't list 6x9, try using Chrome as a command line tool:
 
+From a Windows command prompt:
 ```
 "C:\Program Files\Google\Chrome\Application\chrome.exe" --headless --print-to-pdf="c:\users\jeffc\output.pdf" --print-to-pdf-no-header "file:///C:/Users/jeffc/AppData/Local/Temp/md2book-f74b4440.html"
 ```
