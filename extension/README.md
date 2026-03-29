@@ -60,10 +60,10 @@ npm run compile
 
 ## Packaging & Installing
 
-Install the packaging tool (one-time):
+Enter a nix development shell:
 
-```bash
-npm install -g @vscode/vsce
+```
+nix develop
 ```
 
 Build the `.vsix` file:

@@ -40,10 +40,10 @@ BOOK_CSS = """
   --color-rule:    #c8a97e;
   --font-heading:  'Playfair Display', Georgia, serif;
   --font-body:     'Lora', Georgia, serif;
-  --margin-outer:  0.75in;
-  --margin-inner:  0.875in;
-  --margin-top:    0.75in;
-  --margin-bottom: 0.75in;
+  --margin-outer:  %(margin_outer)s;
+  --margin-inner:  %(margin_inner)s;
+  --margin-top:    %(margin_top)s;
+  --margin-bottom: %(margin_bottom)s;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -812,7 +812,13 @@ def build_pages(pages, base_dir=None):
 def build_html(meta, cover_html, pages_html, overrides):
     """Assemble the final HTML document."""
     accent_color = overrides.get('accent_color') or meta.get('accent_color', '#8b4513')
-    css = BOOK_CSS % {'accent_color': accent_color}
+    css = BOOK_CSS % {
+        'accent_color':  accent_color,
+        'margin_outer':  overrides.get('margin_outer')  or meta.get('margin_outer',  '0.75in'),
+        'margin_inner':  overrides.get('margin_inner')  or meta.get('margin_inner',  '0.875in'),
+        'margin_top':    overrides.get('margin_top')    or meta.get('margin_top',    '0.75in'),
+        'margin_bottom': overrides.get('margin_bottom') or meta.get('margin_bottom', '0.75in'),
+    }
     title = overrides.get('title') or meta.get('title', 'Untitled')
 
     return HTML_TEMPLATE % {
@@ -847,6 +853,14 @@ def main():
         help='Override the accent color (e.g. "#8b4513")')
     parser.add_argument('--cover-image',
         help='Override the cover image (local path or URL)')
+    parser.add_argument('--margin-top',
+        help='Override the top margin (e.g. "0.5in")')
+    parser.add_argument('--margin-bottom',
+        help='Override the bottom margin (e.g. "0.5in")')
+    parser.add_argument('--margin-inner',
+        help='Override the inner (spine-side) margin (e.g. "1in")')
+    parser.add_argument('--margin-outer',
+        help='Override the outer margin (e.g. "0.625in")')
     args = parser.parse_args()
 
     # ── Read input ──────────────────────────────────────────────────────────
@@ -867,12 +881,16 @@ def main():
 
     # ── CLI overrides ────────────────────────────────────────────────────────
     overrides = {k: v for k, v in {
-        'title':        args.title,
-        'subtitle':     args.subtitle,
-        'author':       args.author,
-        'blurb':        args.blurb,
-        'accent_color': args.accent_color,
-        'cover_image':  args.cover_image,
+        'title':         args.title,
+        'subtitle':      args.subtitle,
+        'author':        args.author,
+        'blurb':         args.blurb,
+        'accent_color':  args.accent_color,
+        'cover_image':   args.cover_image,
+        'margin_top':    args.margin_top,
+        'margin_bottom': args.margin_bottom,
+        'margin_inner':  args.margin_inner,
+        'margin_outer':  args.margin_outer,
     }.items() if v}
 
     # ── Load cover image (local file or URL) ────────────────────────────────

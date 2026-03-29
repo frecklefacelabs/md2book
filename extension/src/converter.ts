@@ -22,6 +22,10 @@ export interface BookMeta {
   blurb?: string;
   accent_color?: string;
   cover_image?: string;
+  margin_top?: string;
+  margin_bottom?: string;
+  margin_inner?: string;
+  margin_outer?: string;
   [key: string]: unknown;
 }
 
@@ -36,7 +40,14 @@ export interface ConvertOptions {
 // CSS (embedded in output HTML)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function bookCss(accentColor: string): string {
+interface MarginOptions {
+  marginTop: string;
+  marginBottom: string;
+  marginInner: string;
+  marginOuter: string;
+}
+
+function bookCss(accentColor: string, margins: MarginOptions): string {
   return `
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
 
@@ -50,10 +61,10 @@ function bookCss(accentColor: string): string {
   --color-rule:    #c8a97e;
   --font-heading:  'Playfair Display', Georgia, serif;
   --font-body:     'Lora', Georgia, serif;
-  --margin-outer:  0.75in;
-  --margin-inner:  0.875in;
-  --margin-top:    0.75in;
-  --margin-bottom: 0.75in;
+  --margin-outer:  ${margins.marginOuter};
+  --margin-inner:  ${margins.marginInner};
+  --margin-top:    ${margins.marginTop};
+  --margin-bottom: ${margins.marginBottom};
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -791,10 +802,17 @@ export function convert(source: string, options: ConvertOptions = {}): string {
   const accentColor =
     (overrides.accent_color as string) || meta.accent_color || "#8b4513";
 
+  const margins: MarginOptions = {
+    marginTop:    (overrides.margin_top    as string) || meta.margin_top    || "0.75in",
+    marginBottom: (overrides.margin_bottom as string) || meta.margin_bottom || "0.75in",
+    marginInner:  (overrides.margin_inner  as string) || meta.margin_inner  || "0.875in",
+    marginOuter:  (overrides.margin_outer  as string) || meta.margin_outer  || "0.75in",
+  };
+
   const coverHtml = buildCover(meta, overrides, imageUri);
   const pagesHtml = buildPages(pages, baseDir);
   const title = overrides.title || meta.title || "Untitled";
-  const css = bookCss(accentColor);
+  const css = bookCss(accentColor, margins);
 
   return `<!DOCTYPE html>
 <html lang="en">

@@ -4,6 +4,10 @@ subtitle: A practical guide to simplifying your work, reclaiming your time, and 
 blurb: Most of us are drowning in busyness while starving for results. This book shows you a different way — one small, deliberate choice at a time.
 author: Morgan Elaine Harlow
 cover_image: images/cover.png
+margin_top: 0.30in
+margin_bottom: 0.30in
+margin_inner: 0.30in
+margin_outer: 0.30in
 ---
 
 # Chapter One
