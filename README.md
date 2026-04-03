@@ -1,5 +1,5 @@
 ```
-pip install PyYAML markdown
+pip install PyYAML markdown pygments
 ```
 
 usage:

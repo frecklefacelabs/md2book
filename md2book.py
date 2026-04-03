@@ -19,6 +19,9 @@ from pathlib import Path
 
 import yaml
 import markdown
+from pygments.formatters import HtmlFormatter
+
+PYGMENTS_CSS = HtmlFormatter(style='friendly', nobackground=True).get_style_defs('.codehilite')
 
 
 
@@ -739,7 +742,10 @@ def md_to_html(md_text, base_dir=None):
     import re
     html = markdown.markdown(
         md_text,
-        extensions=['extra', 'sane_lists', 'admonition']
+        extensions=['extra', 'sane_lists', 'admonition', 'codehilite'],
+        extension_configs={
+            'codehilite': {'guess_lang': False},
+        }
     )
     # Strip trailing whitespace inside <pre><code> blocks —
     # the markdown library adds a trailing newline that renders as extra padding
@@ -830,7 +836,7 @@ def build_html(meta, cover_html, pages_html, overrides):
 
     return HTML_TEMPLATE % {
         'title':  title,
-        'css':    css,
+        'css':    css + '\n/* Syntax highlighting */\n' + PYGMENTS_CSS,
         'cover':  cover_html,
         'pages':  pages_html,
     }

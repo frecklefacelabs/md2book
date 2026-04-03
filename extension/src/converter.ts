@@ -10,6 +10,7 @@ import * as path from "path";
 import * as yaml from "js-yaml";
 import MarkdownIt from "markdown-it";
 import admonPlugin from "markdown-it-admon";
+import hljs from "highlight.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -555,8 +556,18 @@ body {
 // Markdown renderer (singleton)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const md = new MarkdownIt({ html: true, typographer: false })
-  .use(admonPlugin);
+const md = new MarkdownIt({
+  html: true,
+  typographer: false,
+  highlight: (str, lang) => {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+      } catch (_) {}
+    }
+    return "";
+  },
+}).use(admonPlugin);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Image handling
@@ -826,6 +837,7 @@ export function convert(source: string, options: ConvertOptions = {}): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(title)}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css" />
   <style>${css}</style>
 </head>
 <body>
