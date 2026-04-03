@@ -268,3 +268,38 @@ For continuous compilation while developing:
 ```bash
 npm run watch
 ```
+
+## Ideas for future
+
+  - Table of contents — auto-generated from # headings, inserted after the cover
+  - External CSS file support — the custom_css idea you mentioned earlier
+  - More weights for Google Fonts — let users optionally specify which weights to request
+  - Running headers — show the chapter title at the top of each page, also page numbers
+  - Back cover — a second special page template, like the cover but for the end
+
+  Maybe this:
+
+    On running headers with variables, that's very doable. You could define a small set of template variables that get substituted per-page at
+  render time:
+
+  - {page} — the current page number
+  - {title} — the book title (from front matter)
+  - {chapter} — the text of the # heading that opened this page
+
+  So a running header definition in front matter might look like:
+
+  running_header: "{chapter}"
+  running_footer: "{title} · {page}"
+
+  The header/footer would be thin absolutely-positioned strips inside each .page div, styled similarly to how the page number already works. The
+  existing page number element could actually be replaced or extended by this system — right now it's just a bare number, but with a footer
+  template it could be My Book · 4 instead.
+
+  A couple of design questions before we dive in:
+
+  1. Header and footer separately, or just one? The current page number is at the bottom. Do you want to keep footer-only for now, or add a top
+  header strip as well?
+  2. Should the cover and first page be excluded? Typically running headers are suppressed on the cover and sometimes the opening page of a
+  chapter. We already have the .cover class for the cover — we could add something like no-header as a per-page directive similar to no-drop-cap.
+  3. Alignment — the current page number is right-aligned. For a real book, odd pages are typically right-aligned and even pages left-aligned
+  (recto/verso). Worth doing from the start, or keep it simple for now?
