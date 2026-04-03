@@ -28,6 +28,7 @@ export interface BookMeta {
   margin_bottom?: string;
   margin_inner?: string;
   margin_outer?: string;
+  styles?: Record<string, string>;
   [key: string]: unknown;
 }
 
@@ -553,6 +554,69 @@ body {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Style override map — semantic name → CSS selector
+// ─────────────────────────────────────────────────────────────────────────────
+
+const STYLE_SELECTORS: Record<string, string | string[]> = {
+  // Interior page
+  h1:                '.page:not(.cover) h1',
+  h2:                '.page:not(.cover) h2',
+  h3:                '.page:not(.cover) h3',
+  h4:                '.page:not(.cover) h4',
+  h5:                '.page:not(.cover) h5',
+  body_text:         '.page:not(.cover) p',
+  blockquote:        '.page:not(.cover) blockquote',
+  code_inline:       '.page:not(.cover) code',
+  code_block:        '.page:not(.cover) pre',
+  // Admonitions — arrays so child text elements are also targeted,
+  // which is necessary to override the general `.page:not(.cover) p` font rules.
+  callout_tip: [
+    '.page:not(.cover) .admonition.tip',
+    '.page:not(.cover) .admonition.tip p',
+    '.page:not(.cover) .admonition.tip .admonition-title',
+  ],
+  callout_warning: [
+    '.page:not(.cover) .admonition.warning',
+    '.page:not(.cover) .admonition.warning p',
+    '.page:not(.cover) .admonition.warning .admonition-title',
+  ],
+  callout_note: [
+    '.page:not(.cover) .admonition.note',
+    '.page:not(.cover) .admonition.note p',
+    '.page:not(.cover) .admonition.note .admonition-title',
+  ],
+  callout_important: [
+    '.page:not(.cover) .admonition.important',
+    '.page:not(.cover) .admonition.important p',
+    '.page:not(.cover) .admonition.important .admonition-title',
+  ],
+  callout_example: [
+    '.page:not(.cover) .admonition.example',
+    '.page:not(.cover) .admonition.example p',
+    '.page:not(.cover) .admonition.example .admonition-title',
+  ],
+  // Cover
+  cover_title:       '.cover h1',
+  cover_subtitle:    '.cover h2',
+  cover_author:      '.cover .author',
+  cover_blurb:       '.cover .blurb',
+};
+
+function buildStyleOverrides(styles: Record<string, string>): string {
+  if (!styles || Object.keys(styles).length === 0) return '';
+  const lines = ['/* User style overrides */'];
+  for (const [name, props] of Object.entries(styles)) {
+    const entry = STYLE_SELECTORS[name];
+    if (!entry) continue;
+    const selectors = Array.isArray(entry) ? entry : [entry];
+    for (const selector of selectors) {
+      lines.push(`${selector} { ${props} }`);
+    }
+  }
+  return lines.join('\n');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Markdown renderer (singleton)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -828,7 +892,10 @@ export function convert(source: string, options: ConvertOptions = {}): string {
   const coverHtml = buildCover(meta, overrides, imageUri);
   const pagesHtml = buildPages(pages, baseDir, dropCap);
   const title = overrides.title || meta.title || "Untitled";
-  const css = bookCss(accentColor, margins);
+  const styleOverrides = buildStyleOverrides(
+    (overrides.styles || meta.styles || {}) as Record<string, string>
+  );
+  const css = bookCss(accentColor, margins) + (styleOverrides ? '\n' + styleOverrides : '');
 
   return `<!DOCTYPE html>
 <html lang="en">

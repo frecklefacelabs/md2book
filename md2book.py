@@ -27,6 +27,73 @@ PYGMENTS_CSS = HtmlFormatter(style='friendly', nobackground=True).get_style_defs
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Style override map — semantic name → CSS selector
+# ─────────────────────────────────────────────────────────────────────────────
+
+STYLE_SELECTORS = {
+    # Interior page
+    'h1':               '.page:not(.cover) h1',
+    'h2':               '.page:not(.cover) h2',
+    'h3':               '.page:not(.cover) h3',
+    'h4':               '.page:not(.cover) h4',
+    'h5':               '.page:not(.cover) h5',
+    'body_text':        '.page:not(.cover) p',
+    'blockquote':       '.page:not(.cover) blockquote',
+    'code_inline':      '.page:not(.cover) code',
+    'code_block':       '.page:not(.cover) pre',
+    # Admonitions — each entry is a list so child text elements are also targeted,
+    # which is necessary to override the general `.page:not(.cover) p` font rules.
+    'callout_tip': [
+        '.page:not(.cover) .admonition.tip',
+        '.page:not(.cover) .admonition.tip p',
+        '.page:not(.cover) .admonition.tip .admonition-title',
+    ],
+    'callout_warning': [
+        '.page:not(.cover) .admonition.warning',
+        '.page:not(.cover) .admonition.warning p',
+        '.page:not(.cover) .admonition.warning .admonition-title',
+    ],
+    'callout_note': [
+        '.page:not(.cover) .admonition.note',
+        '.page:not(.cover) .admonition.note p',
+        '.page:not(.cover) .admonition.note .admonition-title',
+    ],
+    'callout_important': [
+        '.page:not(.cover) .admonition.important',
+        '.page:not(.cover) .admonition.important p',
+        '.page:not(.cover) .admonition.important .admonition-title',
+    ],
+    'callout_example': [
+        '.page:not(.cover) .admonition.example',
+        '.page:not(.cover) .admonition.example p',
+        '.page:not(.cover) .admonition.example .admonition-title',
+    ],
+    # Cover
+    'cover_title':      '.cover h1',
+    'cover_subtitle':   '.cover h2',
+    'cover_author':     '.cover .author',
+    'cover_blurb':      '.cover .blurb',
+}
+
+
+def build_style_overrides(styles):
+    """Convert a {name: css_props} dict from front matter into a CSS override block."""
+    if not styles:
+        return ''
+    lines = ['/* User style overrides */']
+    for name, props in styles.items():
+        selectors = STYLE_SELECTORS.get(name)
+        if selectors is None:
+            print(f"Warning: unknown style name '{name}' — skipped")
+            continue
+        if isinstance(selectors, str):
+            selectors = [selectors]
+        for selector in selectors:
+            lines.append(f'{selector} {{ {props} }}')
+    return '\n'.join(lines)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # CSS — embedded in the output HTML (minified-ish but readable for editing)
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -834,9 +901,14 @@ def build_html(meta, cover_html, pages_html, overrides):
     }
     title = overrides.get('title') or meta.get('title', 'Untitled')
 
+    style_overrides = build_style_overrides(meta.get('styles', {}))
+    full_css = css + '\n/* Syntax highlighting */\n' + PYGMENTS_CSS
+    if style_overrides:
+        full_css += '\n' + style_overrides
+
     return HTML_TEMPLATE % {
         'title':  title,
-        'css':    css + '\n/* Syntax highlighting */\n' + PYGMENTS_CSS,
+        'css':    full_css,
         'cover':  cover_html,
         'pages':  pages_html,
     }

@@ -32,6 +32,41 @@ margin_outer: 0.75in
 
 All fields are optional. The cover page is always generated; fields not provided are simply left blank.
 
+### Style overrides
+
+Use the `styles` key to override the CSS for specific elements. Values are plain CSS property strings:
+
+```yaml
+styles:
+  h2: "font-size: 1.6rem; color: #2a5090;"
+  body_text: "line-height: 1.9; font-size: 0.9rem;"
+  callout_tip: "background: #e8f4f8; border-left-color: #2a7ab5;"
+  cover_title: "font-size: 3rem; letter-spacing: 0.08em;"
+```
+
+Available names:
+
+| Name | Element |
+|---|---|
+| `h1` | Chapter/section label |
+| `h2` | Main heading |
+| `h3` | Subheading |
+| `h4` | Minor heading |
+| `h5` | Minor subheading |
+| `body_text` | Paragraph text |
+| `blockquote` | Blockquote |
+| `code_inline` | Inline code |
+| `code_block` | Code block |
+| `callout_tip` | Tip admonition box |
+| `callout_warning` | Warning admonition box |
+| `callout_note` | Note admonition box |
+| `callout_important` | Important admonition box |
+| `callout_example` | Example admonition box |
+| `cover_title` | Cover page title |
+| `cover_subtitle` | Cover page subtitle |
+| `cover_author` | Cover page author byline |
+| `cover_blurb` | Cover page blurb |
+
 ## Markdown Directives
 
 ### Page breaks
