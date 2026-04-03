@@ -10,6 +10,28 @@ Live preview for md2book. Edit your Markdown book and see it rendered as a beaut
 - **Debounced auto-refresh** — preview updates ~1 second after you stop typing
 - **Self-contained** — no Python or external dependencies needed at runtime
 
+## Front Matter
+
+Add a YAML front matter block at the top of your file to configure the cover page and book styling:
+
+```yaml
+---
+title: My Book
+subtitle: A story of adventure
+author: Freckleface
+blurb: A short teaser paragraph shown at the bottom of the cover.
+cover_image: cover.jpg        # local path or URL
+accent_color: "#8b4513"       # CSS color for headings, drop caps, rules
+drop_cap: true                # set to false to disable drop caps globally
+margin_top: 0.75in
+margin_bottom: 0.75in
+margin_inner: 0.875in         # spine-side margin
+margin_outer: 0.75in
+---
+```
+
+All fields are optional. The cover page is always generated; fields not provided are simply left blank.
+
 ## Markdown Directives
 
 ### Page breaks
@@ -20,9 +42,19 @@ Use an `# ` heading to start a new page (the heading becomes the page title), or
 <!-- pagebreak -->
 ```
 
-### Disable drop cap
+### Drop caps
 
-By default, the first paragraph on each page gets a decorative drop cap. To disable it for a specific page, add this comment before the first paragraph:
+By default, the first paragraph on each page gets a decorative drop cap. You can control this globally via front matter, and override it per page with comments.
+
+**Disable globally:**
+
+```yaml
+---
+drop_cap: false
+---
+```
+
+**Disable on a specific page** (when global is on):
 
 ```markdown
 # Some Chapter
@@ -30,6 +62,69 @@ By default, the first paragraph on each page gets a decorative drop cap. To disa
 
 This paragraph will start normally.
 ```
+
+**Enable on a specific page** (when global is off):
+
+```markdown
+# Some Chapter
+<!-- add-drop-cap -->
+
+This paragraph will get a drop cap.
+```
+
+### Admonition boxes
+
+Call out tips, warnings, and notes with styled admonition boxes:
+
+```markdown
+!!! tip
+    A helpful suggestion with a 💡 icon.
+
+!!! warning
+    Something to watch out for — shown in amber with a ⚠️ icon.
+
+!!! note
+    Extra context — shown in blue with a 📝 icon.
+
+!!! important
+    Critical information — shown in red with a ❗ icon.
+
+!!! example
+    An illustrative example — shown in purple with a 🔍 icon.
+```
+
+### Math
+
+Inline and block math are rendered via KaTeX. Use standard LaTeX delimiters:
+
+```markdown
+Inline: $E = mc^2$
+
+Block:
+$$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$
+```
+
+### Tables
+
+Standard Markdown tables are supported and styled automatically:
+
+```markdown
+| Column A | Column B | Column C |
+|----------|----------|----------|
+| one      | two      | three    |
+| four     | five     | six      |
+```
+
+### Code blocks
+
+Fenced code blocks are styled with a monospace font and an accent-colored left border:
+
+````markdown
+```python
+def hello():
+    print("Hello, world!")
+```
+````
 
 ### Image placement
 
@@ -52,10 +147,11 @@ Format: `![alignment-behavior-size](file)` where alignment is `left`/`right`, be
 
 ## Building
 
+The first time:
+
 ```bash
 cd extension
 npm install
-npm run compile
 ```
 
 ## Packaging & Installing
@@ -69,6 +165,7 @@ nix develop
 Build the `.vsix` file:
 
 ```bash
+npm run compile
 vsce package
 ```
 

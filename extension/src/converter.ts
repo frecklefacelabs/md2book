@@ -22,6 +22,7 @@ export interface BookMeta {
   blurb?: string;
   accent_color?: string;
   cover_image?: string;
+  drop_cap?: boolean;
   margin_top?: string;
   margin_bottom?: string;
   margin_inner?: string;
@@ -747,14 +748,17 @@ function buildCover(
   </div>`;
 }
 
-function buildPages(pages: string[], baseDir?: string): string {
+function buildPages(pages: string[], baseDir?: string, dropCap = true): string {
   return pages
     .map((pageMd, i) => {
-      // Check for <!-- no-drop-cap --> directive and strip it
-      const noDropCap = /<!--\s*no-drop-cap\s*-->/.test(pageMd);
-      if (noDropCap) {
-        pageMd = pageMd.replace(/<!--\s*no-drop-cap\s*-->\n?/g, "");
-      }
+      // Check for per-page directives and strip them
+      const hasNoDropCap  = /<!--\s*no-drop-cap\s*-->/.test(pageMd);
+      const hasAddDropCap = /<!--\s*add-drop-cap\s*-->/.test(pageMd);
+      pageMd = pageMd.replace(/<!--\s*no-drop-cap\s*-->\n?/g, "");
+      pageMd = pageMd.replace(/<!--\s*add-drop-cap\s*-->\n?/g, "");
+
+      // Global off → no drop cap unless page opts in; global on → drop cap unless page opts out
+      const noDropCap = dropCap ? hasNoDropCap : !hasAddDropCap;
 
       const content = mdToHtml(pageMd, baseDir);
 
@@ -809,8 +813,9 @@ export function convert(source: string, options: ConvertOptions = {}): string {
     marginOuter:  (overrides.margin_outer  as string) || meta.margin_outer  || "0.75in",
   };
 
+  const dropCap = overrides.drop_cap ?? meta.drop_cap ?? true;
   const coverHtml = buildCover(meta, overrides, imageUri);
-  const pagesHtml = buildPages(pages, baseDir);
+  const pagesHtml = buildPages(pages, baseDir, dropCap);
   const title = overrides.title || meta.title || "Untitled";
   const css = bookCss(accentColor, margins);
 

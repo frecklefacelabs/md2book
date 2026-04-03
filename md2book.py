@@ -779,14 +779,21 @@ def build_cover(meta, overrides, image_uri=None):
   </div>"""
 
 
-def build_pages(pages, base_dir=None):
+def build_pages(pages, base_dir=None, drop_cap=True):
     """Convert each markdown page chunk to a styled HTML page div."""
     html_pages = []
     for i, page_md in enumerate(pages, start=1):
-        # Check for <!-- no-drop-cap --> directive and strip it
-        no_drop_cap = bool(re.search(r'<!--\s*no-drop-cap\s*-->', page_md))
-        if no_drop_cap:
-            page_md = re.sub(r'<!--\s*no-drop-cap\s*-->\n?', '', page_md)
+        # Check for per-page directives and strip them
+        has_no_drop_cap  = bool(re.search(r'<!--\s*no-drop-cap\s*-->',  page_md))
+        has_add_drop_cap = bool(re.search(r'<!--\s*add-drop-cap\s*-->', page_md))
+        page_md = re.sub(r'<!--\s*no-drop-cap\s*-->\n?',  '', page_md)
+        page_md = re.sub(r'<!--\s*add-drop-cap\s*-->\n?', '', page_md)
+
+        # Global off → no drop cap unless page opts in; global on → drop cap unless page opts out
+        if drop_cap:
+            no_drop_cap = has_no_drop_cap
+        else:
+            no_drop_cap = not has_add_drop_cap
 
         content = md_to_html(page_md, base_dir=base_dir)
         # Indent content for readability, but skip lines inside <pre> blocks
@@ -899,7 +906,8 @@ def main():
 
     # ── Build ────────────────────────────────────────────────────────────────
     cover_html = build_cover(meta, overrides, image_uri=image_uri)
-    pages_html = build_pages(pages, base_dir=input_path.parent)
+    drop_cap   = meta.get('drop_cap', True)
+    pages_html = build_pages(pages, base_dir=input_path.parent, drop_cap=drop_cap)
     html       = build_html(meta, cover_html, pages_html, overrides)
 
     # ── Write output ─────────────────────────────────────────────────────────
