@@ -61,6 +61,7 @@
   },
   "scripts": {
     "compile": "tsc -p ./",
+    "build": "tsc -p ./ ; vsce package ; cp md2book*.vsix /mnt/c/Users/jeffc/vsextensions/",
     "watch": "tsc -watch -p ./",
     "package": "npx @vscode/vsce package"
   },

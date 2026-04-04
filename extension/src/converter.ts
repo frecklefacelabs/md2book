@@ -29,6 +29,9 @@ export interface BookMeta {
   margin_inner?: string;
   margin_outer?: string;
   styles?: Record<string, string>;
+  google_fonts?: string[];
+  font_heading?: string;
+  font_body?: string;
   [key: string]: unknown;
 }
 
@@ -50,7 +53,21 @@ interface MarginOptions {
   marginOuter: string;
 }
 
-function bookCss(accentColor: string, margins: MarginOptions): string {
+function buildGoogleFontsImport(fontNames: string[]): string {
+  if (!fontNames || fontNames.length === 0) return '';
+  const families = fontNames.map(
+    (name) => `family=${name.replace(/ /g, '+')}:ital,wght@0,400;0,700;1,400`
+  );
+  const url = `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`;
+  return `@import url('${url}');`;
+}
+
+function bookCss(
+  accentColor: string,
+  margins: MarginOptions,
+  fontHeading: string,
+  fontBody: string
+): string {
   return `
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
 
@@ -62,8 +79,8 @@ function bookCss(accentColor: string, margins: MarginOptions): string {
   --color-heading: #1a1208;
   --color-accent:  ${accentColor};
   --color-rule:    #c8a97e;
-  --font-heading:  'Playfair Display', Georgia, serif;
-  --font-body:     'Lora', Georgia, serif;
+  --font-heading:  ${fontHeading};
+  --font-body:     ${fontBody};
   --margin-outer:  ${margins.marginOuter};
   --margin-inner:  ${margins.marginInner};
   --margin-top:    ${margins.marginTop};
@@ -892,10 +909,16 @@ export function convert(source: string, options: ConvertOptions = {}): string {
   const coverHtml = buildCover(meta, overrides, imageUri);
   const pagesHtml = buildPages(pages, baseDir, dropCap);
   const title = overrides.title || meta.title || "Untitled";
+  const fontHeading = (overrides.font_heading as string) || meta.font_heading || "'Playfair Display', Georgia, serif";
+  const fontBody    = (overrides.font_body    as string) || meta.font_body    || "'Lora', Georgia, serif";
+  const googleFonts = (overrides.google_fonts || meta.google_fonts || []) as string[];
+  const userImport  = buildGoogleFontsImport(googleFonts);
   const styleOverrides = buildStyleOverrides(
     (overrides.styles || meta.styles || {}) as Record<string, string>
   );
-  const css = bookCss(accentColor, margins) + (styleOverrides ? '\n' + styleOverrides : '');
+  const css = (userImport ? userImport + '\n' : '') +
+    bookCss(accentColor, margins, fontHeading, fontBody) +
+    (styleOverrides ? '\n' + styleOverrides : '');
 
   return `<!DOCTYPE html>
 <html lang="en">

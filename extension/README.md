@@ -32,6 +32,21 @@ margin_outer: 0.75in
 
 All fields are optional. The cover page is always generated; fields not provided are simply left blank.
 
+### Custom fonts
+
+Import any font from Google Fonts by name and then reference it in `styles:` or via `font_heading`/`font_body`:
+
+```yaml
+google_fonts:
+  - Merriweather
+  - Open Sans
+
+font_body: "'Merriweather', serif"
+font_heading: "'Open Sans', sans-serif"
+```
+
+`google_fonts` accepts a list of family names exactly as they appear on fonts.google.com. Regular, bold, and italic weights are requested automatically. The built-in defaults are `'Playfair Display'` for headings and `'Lora'` for body text.
+
 ### Style overrides
 
 Use the `styles` key to override the CSS for specific elements. Values are plain CSS property strings:

@@ -76,6 +76,18 @@ STYLE_SELECTORS = {
 }
 
 
+def build_google_fonts_import(font_names):
+    """Generate a Google Fonts @import for a list of family names."""
+    if not font_names:
+        return ''
+    families = []
+    for name in font_names:
+        encoded = name.replace(' ', '+')
+        families.append(f'family={encoded}:ital,wght@0,400;0,700;1,400')
+    url = 'https://fonts.googleapis.com/css2?' + '&'.join(families) + '&display=swap'
+    return f"@import url('{url}');"
+
+
 def build_style_overrides(styles):
     """Convert a {name: css_props} dict from front matter into a CSS override block."""
     if not styles:
@@ -108,8 +120,8 @@ BOOK_CSS = """
   --color-heading: #1a1208;
   --color-accent:  %(accent_color)s;
   --color-rule:    #c8a97e;
-  --font-heading:  'Playfair Display', Georgia, serif;
-  --font-body:     'Lora', Georgia, serif;
+  --font-heading:  %(font_heading)s;
+  --font-body:     %(font_body)s;
   --margin-outer:  %(margin_outer)s;
   --margin-inner:  %(margin_inner)s;
   --margin-top:    %(margin_top)s;
@@ -892,8 +904,12 @@ def build_pages(pages, base_dir=None, drop_cap=True):
 def build_html(meta, cover_html, pages_html, overrides):
     """Assemble the final HTML document."""
     accent_color = overrides.get('accent_color') or meta.get('accent_color', '#8b4513')
+    font_heading = overrides.get('font_heading') or meta.get('font_heading', "'Playfair Display', Georgia, serif")
+    font_body    = overrides.get('font_body')    or meta.get('font_body',    "'Lora', Georgia, serif")
     css = BOOK_CSS % {
         'accent_color':  accent_color,
+        'font_heading':  font_heading,
+        'font_body':     font_body,
         'margin_outer':  overrides.get('margin_outer')  or meta.get('margin_outer',  '0.75in'),
         'margin_inner':  overrides.get('margin_inner')  or meta.get('margin_inner',  '0.875in'),
         'margin_top':    overrides.get('margin_top')    or meta.get('margin_top',    '0.75in'),
@@ -901,8 +917,10 @@ def build_html(meta, cover_html, pages_html, overrides):
     }
     title = overrides.get('title') or meta.get('title', 'Untitled')
 
+    google_fonts = meta.get('google_fonts') or []
+    user_import  = build_google_fonts_import(google_fonts)
     style_overrides = build_style_overrides(meta.get('styles', {}))
-    full_css = css + '\n/* Syntax highlighting */\n' + PYGMENTS_CSS
+    full_css = (user_import + '\n' if user_import else '') + css + '\n/* Syntax highlighting */\n' + PYGMENTS_CSS
     if style_overrides:
         full_css += '\n' + style_overrides
 
