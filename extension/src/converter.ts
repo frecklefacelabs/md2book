@@ -16,6 +16,13 @@ import hljs from "highlight.js";
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
+export interface HFConfig {
+  left?: string;
+  right?: string;
+  center?: string;
+  rule?: string | boolean;
+}
+
 export interface BookMeta {
   title?: string;
   subtitle?: string;
@@ -32,6 +39,8 @@ export interface BookMeta {
   google_fonts?: string[];
   font_heading?: string;
   font_body?: string;
+  header?: HFConfig;
+  footer?: HFConfig;
   [key: string]: unknown;
 }
 
@@ -110,7 +119,7 @@ body {
   box-shadow: 0 4px 24px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10);
 }
 
-.page:not(.cover)::before {
+.page:not(.cover):not(.has-header)::before {
   content: '';
   display: block;
   position: absolute;
@@ -411,9 +420,11 @@ body {
   white-space: pre;
 }
 
-.page-number {
+/* ============================================================
+   HEADERS AND FOOTERS
+   ============================================================ */
+.page-header, .page-footer {
   position: absolute;
-  bottom: 0.45in;
   left: var(--margin-inner);
   width: calc(var(--page-width) - var(--margin-outer) - var(--margin-inner));
   font-family: var(--font-body);
@@ -421,16 +432,46 @@ body {
   color: var(--color-rule);
   letter-spacing: 0.1em;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
 }
-.page-number::before {
-  content: '';
+.page-header { top: 0.45in; }
+.page-footer { bottom: 0.45in; }
+.hf-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+}
+.hf-right { margin-left: auto; }
+.hf-center { margin: 0 auto; }
+/* Inline rule — expands to fill the gap between left and right content */
+.rule-inline .hf-right { margin-left: 0; }
+.rule-inline .hf-fill {
   flex: 1;
   height: 1px;
   background: var(--color-rule);
   margin-right: 0.15in;
   opacity: 0.5;
+}
+.rule-inline .hf-left + .hf-fill { margin-left: 0.15in; }
+/* Full-width rule above */
+.rule-above::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(to right, var(--color-rule), transparent);
+  opacity: 0.5;
+  margin-bottom: 0.06in;
+}
+/* Full-width rule below */
+.rule-below::after {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(to right, var(--color-rule), transparent);
+  opacity: 0.5;
+  margin-top: 0.06in;
 }
 
 /* Cover */
@@ -840,9 +881,85 @@ function buildCover(
   </div>`;
 }
 
-function buildPages(pages: string[], baseDir?: string, dropCap = true): string {
+const DEFAULT_FOOTER_CONFIG: HFConfig = { right: "{page}", rule: "inline" };
+
+function getChapterName(pageMd: string): string {
+  const firstLine = pageMd.trim().split("\n")[0];
+  const match = firstLine.match(/^#\s+(.+)/);
+  return match ? match[1].trim() : "";
+}
+
+function renderHfVariables(
+  template: string,
+  pageNum: number,
+  title: string,
+  chapter: string
+): string {
+  if (!template) return "";
+  return template
+    .replace(/\{page\}/g,    String(pageNum))
+    .replace(/\{title\}/g,   title   || "")
+    .replace(/\{chapter\}/g, chapter || "");
+}
+
+function buildHfHtml(
+  config: HFConfig,
+  pageNum: number,
+  title: string,
+  chapter: string,
+  isHeader = false
+): string {
+  const cssClass    = isHeader ? "page-header" : "page-footer";
+  const defaultRule = isHeader ? "false" : "inline";
+
+  const left   = renderHfVariables(config.left   || "", pageNum, title, chapter);
+  const right  = renderHfVariables(config.right  || "", pageNum, title, chapter);
+  const center = renderHfVariables(config.center || "", pageNum, title, chapter);
+
+  // YAML parses `rule: false` as boolean false
+  let rule: string = (config.rule === false || config.rule === undefined)
+    ? (config.rule === false ? "false" : defaultRule)
+    : String(config.rule);
+
+  // rule: inline doesn't make sense with center-only — fall back gracefully
+  if (center && rule === "inline") {
+    rule = isHeader ? "below" : "above";
+  }
+
+  const ruleClass = rule !== "false" ? ` rule-${rule}` : "";
+
+  let content: string;
+  if (center) {
+    content = `<span class="hf-center">${center}</span>`;
+  } else {
+    const parts: string[] = [];
+    if (left)              parts.push(`<span class="hf-left">${left}</span>`);
+    if (rule === "inline") parts.push(`<span class="hf-fill"></span>`);
+    if (right)             parts.push(`<span class="hf-right">${right}</span>`);
+    content = parts.join("");
+  }
+
+  return `    <div class="${cssClass}${ruleClass}"><div class="hf-content">${content}</div></div>`;
+}
+
+function buildPages(
+  pages: string[],
+  baseDir?: string,
+  dropCap = true,
+  headerConfig?: HFConfig,
+  footerConfig?: HFConfig,
+  title = ""
+): string {
+  let currentChapter = "";
+
   return pages
     .map((pageMd, i) => {
+      const pageNum = i + 1;
+
+      // Track chapter name; carry forward when page has no heading
+      const chapterName = getChapterName(pageMd);
+      if (chapterName) currentChapter = chapterName;
+
       // Check for per-page directives and strip them
       const hasNoDropCap  = /<!--\s*no-drop-cap\s*-->/.test(pageMd);
       const hasAddDropCap = /<!--\s*add-drop-cap\s*-->/.test(pageMd);
@@ -863,10 +980,20 @@ function buildPages(pages: string[], baseDir?: string, dropCap = true): string {
         if (line.includes("</pre>")) inPre = false;
       }
 
-      const pageClass = noDropCap ? "page no-drop-cap" : "page";
+      const pageClass = [
+        "page",
+        noDropCap    ? "no-drop-cap" : "",
+        headerConfig ? "has-header"  : "",
+      ].filter(Boolean).join(" ");
+
+      const headerHtml = headerConfig
+        ? "\n" + buildHfHtml(headerConfig, pageNum, title, currentChapter, true)
+        : "";
+      const activeFooter = footerConfig ?? DEFAULT_FOOTER_CONFIG;
+      const footerHtml = "\n" + buildHfHtml(activeFooter, pageNum, title, currentChapter, false);
+
       return `  <div class="${pageClass}">
-${indentedLines.join("\n")}
-    <div class="page-number"><span>${i + 1}</span></div>
+${indentedLines.join("\n")}${headerHtml}${footerHtml}
   </div>`;
     })
     .join("\n");
@@ -905,10 +1032,12 @@ export function convert(source: string, options: ConvertOptions = {}): string {
     marginOuter:  (overrides.margin_outer  as string) || meta.margin_outer  || "0.75in",
   };
 
-  const dropCap = overrides.drop_cap ?? meta.drop_cap ?? true;
-  const coverHtml = buildCover(meta, overrides, imageUri);
-  const pagesHtml = buildPages(pages, baseDir, dropCap);
-  const title = overrides.title || meta.title || "Untitled";
+  const dropCap     = overrides.drop_cap ?? meta.drop_cap ?? true;
+  const title        = (overrides.title as string) || meta.title || "Untitled";
+  const headerConfig = (overrides.header || meta.header) as HFConfig | undefined;
+  const footerConfig = (overrides.footer || meta.footer) as HFConfig | undefined;
+  const coverHtml    = buildCover(meta, overrides, imageUri);
+  const pagesHtml    = buildPages(pages, baseDir, dropCap, headerConfig, footerConfig, title);
   const fontHeading = (overrides.font_heading as string) || meta.font_heading || "'Playfair Display', Georgia, serif";
   const fontBody    = (overrides.font_body    as string) || meta.font_body    || "'Lora', Georgia, serif";
   const googleFonts = (overrides.google_fonts || meta.google_fonts || []) as string[];

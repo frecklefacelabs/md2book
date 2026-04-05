@@ -84,6 +84,37 @@ Available names:
 
 ## Markdown Directives
 
+### Headers and footers
+
+By default each page shows a page number in the bottom-right with a decorative rule. You can customise the header and/or footer independently using `left`, `right`, or `center` slots and an optional `rule` setting.
+
+```yaml
+header:
+  left: "{chapter}"
+  right: "{page}"
+
+footer:
+  left: "{title}"
+  right: "{page}"
+```
+
+**Available variables:** `{page}` · `{title}` · `{chapter}`
+
+`{chapter}` is the text of the `#` heading that opened the current page. If a page has no heading (e.g. it started with `<!-- pagebreak -->`), the previous chapter title is carried forward automatically.
+
+**Rule options:**
+
+| Value | Effect |
+|---|---|
+| `inline` | Rule fills the gap between left and right content (footer default) |
+| `above` | Full-width rule above the text |
+| `below` | Full-width rule below the text |
+| `false` | No rule (header default) |
+
+`rule: inline` with `center` content falls back to `above` (footer) or `below` (header) automatically.
+
+The cover page always suppresses both header and footer.
+
 ### Page breaks
 
 Use an `# ` heading to start a new page (the heading becomes the page title), or use a comment for a page break without a heading:
@@ -122,7 +153,7 @@ This paragraph will start normally.
 This paragraph will get a drop cap.
 ```
 
-### Admonition boxes
+### Tip boxes
 
 Call out tips, warnings, and notes with styled admonition boxes:
 

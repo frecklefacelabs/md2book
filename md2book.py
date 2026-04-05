@@ -151,7 +151,7 @@ body {
   box-shadow: 0 4px 24px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10);
 }
 
-.page:not(.cover)::before {
+.page:not(.cover):not(.has-header)::before {
   content: '';
   display: block;
   position: absolute;
@@ -452,9 +452,11 @@ body {
   white-space: pre;
 }
 
-.page-number {
+/* ============================================================
+   HEADERS AND FOOTERS
+   ============================================================ */
+.page-header, .page-footer {
   position: absolute;
-  bottom: 0.45in;
   left: var(--margin-inner);
   width: calc(var(--page-width) - var(--margin-outer) - var(--margin-inner));
   font-family: var(--font-body);
@@ -462,16 +464,46 @@ body {
   color: var(--color-rule);
   letter-spacing: 0.1em;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
 }
-.page-number::before {
-  content: '';
+.page-header { top: 0.45in; }
+.page-footer { bottom: 0.45in; }
+.hf-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%%;
+}
+.hf-right { margin-left: auto; }
+.hf-center { margin: 0 auto; }
+/* Inline rule — expands to fill the gap between left and right content */
+.rule-inline .hf-right { margin-left: 0; }
+.rule-inline .hf-fill {
   flex: 1;
   height: 1px;
   background: var(--color-rule);
   margin-right: 0.15in;
   opacity: 0.5;
+}
+.rule-inline .hf-left + .hf-fill { margin-left: 0.15in; }
+/* Full-width rule above */
+.rule-above::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(to right, var(--color-rule), transparent);
+  opacity: 0.5;
+  margin-bottom: 0.06in;
+}
+/* Full-width rule below */
+.rule-below::after {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(to right, var(--color-rule), transparent);
+  opacity: 0.5;
+  margin-top: 0.06in;
 }
 
 /* Cover */
@@ -864,10 +896,74 @@ def build_cover(meta, overrides, image_uri=None):
   </div>"""
 
 
-def build_pages(pages, base_dir=None, drop_cap=True):
+DEFAULT_FOOTER_CONFIG = {'right': '{page}', 'rule': 'inline'}
+
+
+def get_chapter_name(page_md):
+    """Return the text of the leading # heading, or '' if the page has none."""
+    first_line = page_md.strip().split('\n')[0]
+    match = re.match(r'^#\s+(.+)', first_line)
+    return match.group(1).strip() if match else ''
+
+
+def render_hf_variables(template, page_num, title, chapter):
+    """Substitute {page}, {title}, {chapter} in a header/footer template string."""
+    if not template:
+        return ''
+    return (template
+            .replace('{page}',    str(page_num))
+            .replace('{title}',   title   or '')
+            .replace('{chapter}', chapter or ''))
+
+
+def build_hf_html(config, page_num, title, chapter, is_header=False):
+    """Build the HTML div for a page header or footer."""
+    css_class    = 'page-header' if is_header else 'page-footer'
+    default_rule = 'false' if is_header else 'inline'
+
+    left   = render_hf_variables(config.get('left',   ''), page_num, title, chapter)
+    right  = render_hf_variables(config.get('right',  ''), page_num, title, chapter)
+    center = render_hf_variables(config.get('center', ''), page_num, title, chapter)
+    rule   = config.get('rule', default_rule)
+
+    # YAML parses `rule: false` as boolean False
+    if rule is False:
+        rule = 'false'
+
+    # rule: inline doesn't make sense with center-only — fall back gracefully
+    if center and rule == 'inline':
+        rule = 'below' if is_header else 'above'
+
+    rule_class = f' rule-{rule}' if rule != 'false' else ''
+
+    if center:
+        content = f'<span class="hf-center">{center}</span>'
+    else:
+        parts = []
+        if left:
+            parts.append(f'<span class="hf-left">{left}</span>')
+        if rule == 'inline':
+            parts.append('<span class="hf-fill"></span>')
+        if right:
+            parts.append(f'<span class="hf-right">{right}</span>')
+        content = ''.join(parts)
+
+    return (f'    <div class="{css_class}{rule_class}">'
+            f'<div class="hf-content">{content}</div></div>')
+
+
+def build_pages(pages, base_dir=None, drop_cap=True,
+                header_config=None, footer_config=None, title=''):
     """Convert each markdown page chunk to a styled HTML page div."""
     html_pages = []
+    current_chapter = ''
+
     for i, page_md in enumerate(pages, start=1):
+        # Track chapter name; carry forward when page has no heading
+        chapter_name = get_chapter_name(page_md)
+        if chapter_name:
+            current_chapter = chapter_name
+
         # Check for per-page directives and strip them
         has_no_drop_cap  = bool(re.search(r'<!--\s*no-drop-cap\s*-->',  page_md))
         has_add_drop_cap = bool(re.search(r'<!--\s*add-drop-cap\s*-->', page_md))
@@ -896,8 +992,21 @@ def build_pages(pages, base_dir=None, drop_cap=True):
                 in_pre = False
         indented = '\n'.join(indented_lines)
         page_class = 'page no-drop-cap' if no_drop_cap else 'page'
-        html_pages.append('  <div class="%s">\n%s\n    <div class="page-number">'
-                          '<span>%d</span></div>\n  </div>' % (page_class, indented, i))
+        if header_config:
+            page_class += ' has-header'
+
+        header_html = ''
+        if header_config:
+            header_html = '\n' + build_hf_html(
+                header_config, i, title, current_chapter, is_header=True)
+
+        active_footer = footer_config if footer_config is not None else DEFAULT_FOOTER_CONFIG
+        footer_html = '\n' + build_hf_html(
+            active_footer, i, title, current_chapter, is_header=False)
+
+        html_pages.append(
+            f'  <div class="{page_class}">\n{indented}{header_html}{footer_html}\n  </div>')
+
     return '\n'.join(html_pages)
 
 
@@ -1001,10 +1110,15 @@ def main():
     image_uri = load_image_as_data_uri(image_ref, base_dir=input_path.parent)
 
     # ── Build ────────────────────────────────────────────────────────────────
-    cover_html = build_cover(meta, overrides, image_uri=image_uri)
-    drop_cap   = meta.get('drop_cap', True)
-    pages_html = build_pages(pages, base_dir=input_path.parent, drop_cap=drop_cap)
-    html       = build_html(meta, cover_html, pages_html, overrides)
+    cover_html    = build_cover(meta, overrides, image_uri=image_uri)
+    drop_cap      = meta.get('drop_cap', True)
+    title         = overrides.get('title') or meta.get('title', '')
+    header_config = meta.get('header')
+    footer_config = meta.get('footer')
+    pages_html    = build_pages(pages, base_dir=input_path.parent, drop_cap=drop_cap,
+                                header_config=header_config, footer_config=footer_config,
+                                title=title)
+    html          = build_html(meta, cover_html, pages_html, overrides)
 
     # ── Write output ─────────────────────────────────────────────────────────
     output_path = Path(args.output) if args.output else input_path.with_suffix('.html')
