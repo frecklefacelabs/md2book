@@ -43,9 +43,16 @@ google_fonts:
 
 font_body: "'Merriweather', serif"
 font_heading: "'Open Sans', sans-serif"
+font_code: "'Fira Code', monospace"
 ```
 
-`google_fonts` accepts a list of family names exactly as they appear on fonts.google.com. Regular, bold, and italic weights are requested automatically. The built-in defaults are `'Playfair Display'` for headings and `'Lora'` for body text.
+`google_fonts` accepts a list of family names exactly as they appear on fonts.google.com. Regular, bold, and italic weights are requested automatically.
+
+| Key | Applies to | Default |
+|---|---|---|
+| `font_heading` | Headings (h1–h5) | `'Playfair Display', Georgia, serif` |
+| `font_body` | Body text, blockquotes, captions | `'Lora', Georgia, serif` |
+| `font_code` | Inline code and code blocks | `'Courier New', Courier, monospace` |
 
 ### Style overrides
 

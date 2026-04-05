@@ -41,6 +41,7 @@ export interface BookMeta {
   google_fonts?: string[];
   font_heading?: string;
   font_body?: string;
+  font_code?: string;
   header?: HFConfig;
   footer?: HFConfig;
   [key: string]: unknown;
@@ -77,7 +78,8 @@ function bookCss(
   accentColor: string,
   margins: MarginOptions,
   fontHeading: string,
-  fontBody: string
+  fontBody: string,
+  fontCode: string
 ): string {
   return `
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
@@ -92,6 +94,7 @@ function bookCss(
   --color-rule:    #c8a97e;
   --font-heading:  ${fontHeading};
   --font-body:     ${fontBody};
+  --font-code:     ${fontCode};
   --margin-outer:  ${margins.marginOuter};
   --margin-inner:  ${margins.marginInner};
   --margin-top:    ${margins.marginTop};
@@ -392,7 +395,7 @@ body {
 
 /* Inline code */
 .page:not(.cover) code {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: var(--font-code);
   font-size: 0.8rem;
   background: #f0ebe3;
   color: #8b4513;
@@ -412,7 +415,7 @@ body {
   overflow: hidden;
 }
 .page:not(.cover) pre code {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: var(--font-code);
   font-size: 0.78rem;
   line-height: 1.6;
   color: #2a2118;
@@ -627,9 +630,15 @@ const STYLE_SELECTORS: Record<string, string | string[]> = {
   h4:                '.page:not(.cover) h4',
   h5:                '.page:not(.cover) h5',
   body_text:         '.page:not(.cover) p',
-  blockquote:        '.page:not(.cover) blockquote',
+  blockquote: [
+    '.page:not(.cover) blockquote',
+    '.page:not(.cover) blockquote p',
+  ],
   code_inline:       '.page:not(.cover) code',
-  code_block:        '.page:not(.cover) pre',
+  code_block: [
+    '.page:not(.cover) pre',
+    '.page:not(.cover) pre code',
+  ],
   // Admonitions — arrays so child text elements are also targeted,
   // which is necessary to override the general `.page:not(.cover) p` font rules.
   callout: [
@@ -1052,13 +1061,14 @@ export function convert(source: string, options: ConvertOptions = {}): string {
   const pagesHtml    = buildPages(pages, baseDir, dropCap, headerConfig, footerConfig, title);
   const fontHeading = (overrides.font_heading as string) || meta.font_heading || "'Playfair Display', Georgia, serif";
   const fontBody    = (overrides.font_body    as string) || meta.font_body    || "'Lora', Georgia, serif";
+  const fontCode    = (overrides.font_code    as string) || meta.font_code    || "'Courier New', Courier, monospace";
   const googleFonts = (overrides.google_fonts || meta.google_fonts || []) as string[];
   const userImport  = buildGoogleFontsImport(googleFonts);
   const styleOverrides = buildStyleOverrides(
     (overrides.styles || meta.styles || {}) as Record<string, string>
   );
   const css = (userImport ? userImport + '\n' : '') +
-    bookCss(accentColor, margins, fontHeading, fontBody) +
+    bookCss(accentColor, margins, fontHeading, fontBody, fontCode) +
     (styleOverrides ? '\n' + styleOverrides : '');
 
   return `<!DOCTYPE html>

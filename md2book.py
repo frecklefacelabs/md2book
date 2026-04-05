@@ -38,9 +38,15 @@ STYLE_SELECTORS = {
     'h4':               '.page:not(.cover) h4',
     'h5':               '.page:not(.cover) h5',
     'body_text':        '.page:not(.cover) p',
-    'blockquote':       '.page:not(.cover) blockquote',
+    'blockquote': [
+        '.page:not(.cover) blockquote',
+        '.page:not(.cover) blockquote p',
+    ],
     'code_inline':      '.page:not(.cover) code',
-    'code_block':       '.page:not(.cover) pre',
+    'code_block': [
+        '.page:not(.cover) pre',
+        '.page:not(.cover) pre code',
+    ],
     # Admonitions — each entry is a list so child text elements are also targeted,
     # which is necessary to override the general `.page:not(.cover) p` font rules.
     'callout': [
@@ -127,6 +133,7 @@ BOOK_CSS = """
   --color-rule:    #c8a97e;
   --font-heading:  %(font_heading)s;
   --font-body:     %(font_body)s;
+  --font-code:     %(font_code)s;
   --margin-outer:  %(margin_outer)s;
   --margin-inner:  %(margin_inner)s;
   --margin-top:    %(margin_top)s;
@@ -427,7 +434,7 @@ body {
 
 /* Inline code */
 .page:not(.cover) code {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: var(--font-code);
   font-size: 0.8rem;
   background: #f0ebe3;
   color: #8b4513;
@@ -447,7 +454,7 @@ body {
   overflow: hidden;
 }
 .page:not(.cover) pre code {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: var(--font-code);
   font-size: 0.78rem;
   line-height: 1.6;
   color: #2a2118;
@@ -1026,10 +1033,12 @@ def build_html(meta, cover_html, pages_html, overrides):
     accent_color = overrides.get('accent_color') or meta.get('accent_color', '#8b4513')
     font_heading = overrides.get('font_heading') or meta.get('font_heading', "'Playfair Display', Georgia, serif")
     font_body    = overrides.get('font_body')    or meta.get('font_body',    "'Lora', Georgia, serif")
+    font_code    = overrides.get('font_code')    or meta.get('font_code',    "'Courier New', Courier, monospace")
     css = BOOK_CSS % {
         'accent_color':  accent_color,
         'font_heading':  font_heading,
         'font_body':     font_body,
+        'font_code':     font_code,
         'margin_outer':  overrides.get('margin_outer')  or meta.get('margin_outer',  '0.75in'),
         'margin_inner':  overrides.get('margin_inner')  or meta.get('margin_inner',  '0.875in'),
         'margin_top':    overrides.get('margin_top')    or meta.get('margin_top',    '0.75in'),
