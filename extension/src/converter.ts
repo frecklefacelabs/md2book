@@ -393,6 +393,15 @@ body {
   border-bottom: 1px solid #ddd5c8;
 }
 
+/* Links */
+.page:not(.cover) a {
+  color: #2a5db0;
+  text-decoration: none;
+}
+.page:not(.cover) a:hover {
+  text-decoration: underline;
+}
+
 /* Inline code */
 .page:not(.cover) code {
   font-family: var(--font-code);
@@ -634,6 +643,7 @@ const STYLE_SELECTORS: Record<string, string | string[]> = {
     '.page:not(.cover) blockquote',
     '.page:not(.cover) blockquote p',
   ],
+  link:              '.page:not(.cover) a',
   code_inline:       '.page:not(.cover) code',
   code_block: [
     '.page:not(.cover) pre',
