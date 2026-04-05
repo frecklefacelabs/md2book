@@ -132,6 +132,24 @@ The defaults are `0.45in` for both.
 
 The cover page always suppresses both header and footer.
 
+### Special characters
+
+Some characters have special meaning in Markdown and need to be escaped to appear literally.
+
+Most Markdown special characters (`*`, `_`, `#`, `[`, `` ` ``, etc.) can be escaped with a backslash — e.g. `\*` renders as a literal asterisk.
+
+A few require HTML entities instead:
+
+| Character | Problem | Use instead |
+|---|---|---|
+| `>` at start of line | Creates a blockquote | `&gt;` |
+| `&` followed by word + `;` | May render as HTML entity (e.g. `&copy;` → ©) | `&amp;` |
+
+Two others worth knowing about:
+
+- **`---` alone on a line** — renders as a horizontal rule. If you need three dashes in text, put them inline in a sentence rather than on their own line.
+- **`\|`** — if a line looks like a table row (multiple `|` characters), Markdown may parse it as a table. Escape individual pipes with `\|` if needed.
+
 ### Page breaks
 
 Use an `# ` heading to start a new page (the heading becomes the page title), or use a comment for a page break without a heading:

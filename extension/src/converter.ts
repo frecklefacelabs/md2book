@@ -225,13 +225,15 @@ body {
   clear: both;
 }
 .page:not(.cover) blockquote {
-  border-left: 3px solid var(--color-rule);
-  margin: 0.2in 0 0.2in 0.2in;
-  padding-left: 0.15in;
+  border-left: 3px solid var(--color-accent);
+  background: rgba(200, 169, 126, 0.12);
+  border-radius: 0 3px 3px 0;
+  margin: 0.2in 0 0.2in 0.1in;
+  padding: 0.1in 0.15in 0.1in 0.18in;
   font-style: italic;
-  color: var(--color-accent);
+  color: var(--color-text);
   font-size: 0.875rem;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 .page:not(.cover) ul,
 .page:not(.cover) ol {
