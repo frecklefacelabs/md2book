@@ -21,6 +21,8 @@ export interface HFConfig {
   right?: string;
   center?: string;
   rule?: string | boolean;
+  top?: string;
+  bottom?: string;
 }
 
 export interface BookMeta {
@@ -628,6 +630,11 @@ const STYLE_SELECTORS: Record<string, string | string[]> = {
   code_block:        '.page:not(.cover) pre',
   // Admonitions — arrays so child text elements are also targeted,
   // which is necessary to override the general `.page:not(.cover) p` font rules.
+  callout: [
+    '.page:not(.cover) .admonition',
+    '.page:not(.cover) .admonition p',
+    '.page:not(.cover) .admonition .admonition-title',
+  ],
   callout_tip: [
     '.page:not(.cover) .admonition.tip',
     '.page:not(.cover) .admonition.tip p',
@@ -926,7 +933,10 @@ function buildHfHtml(
     rule = isHeader ? "below" : "above";
   }
 
-  const ruleClass = rule !== "false" ? ` rule-${rule}` : "";
+  const ruleClass    = rule !== "false" ? ` rule-${rule}` : "";
+  const positionKey = isHeader ? "top" : "bottom";
+  const positionVal = isHeader ? config.top : config.bottom;
+  const styleAttr   = positionVal ? ` style="${positionKey}: ${positionVal}"` : "";
 
   let content: string;
   if (center) {
@@ -939,7 +949,7 @@ function buildHfHtml(
     content = parts.join("");
   }
 
-  return `    <div class="${cssClass}${ruleClass}"><div class="hf-content">${content}</div></div>`;
+  return `    <div class="${cssClass}${ruleClass}"${styleAttr}><div class="hf-content">${content}</div></div>`;
 }
 
 function buildPages(

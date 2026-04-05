@@ -43,6 +43,11 @@ STYLE_SELECTORS = {
     'code_block':       '.page:not(.cover) pre',
     # Admonitions — each entry is a list so child text elements are also targeted,
     # which is necessary to override the general `.page:not(.cover) p` font rules.
+    'callout': [
+        '.page:not(.cover) .admonition',
+        '.page:not(.cover) .admonition p',
+        '.page:not(.cover) .admonition .admonition-title',
+    ],
     'callout_tip': [
         '.page:not(.cover) .admonition.tip',
         '.page:not(.cover) .admonition.tip p',
@@ -936,6 +941,10 @@ def build_hf_html(config, page_num, title, chapter, is_header=False):
 
     rule_class = f' rule-{rule}' if rule != 'false' else ''
 
+    position_key = 'top' if is_header else 'bottom'
+    position_val = config.get(position_key, '')
+    style_attr   = f' style="{position_key}: {position_val}"' if position_val else ''
+
     if center:
         content = f'<span class="hf-center">{center}</span>'
     else:
@@ -948,7 +957,7 @@ def build_hf_html(config, page_num, title, chapter, is_header=False):
             parts.append(f'<span class="hf-right">{right}</span>')
         content = ''.join(parts)
 
-    return (f'    <div class="{css_class}{rule_class}">'
+    return (f'    <div class="{css_class}{rule_class}"{style_attr}>'
             f'<div class="hf-content">{content}</div></div>')
 
 

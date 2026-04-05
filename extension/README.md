@@ -72,11 +72,12 @@ Available names:
 | `blockquote` | Blockquote |
 | `code_inline` | Inline code |
 | `code_block` | Code block |
-| `callout_tip` | Tip admonition box |
-| `callout_warning` | Warning admonition box |
-| `callout_note` | Note admonition box |
-| `callout_important` | Important admonition box |
-| `callout_example` | Example admonition box |
+| `callout` | All admonition boxes (base style) |
+| `callout_tip` | Tip admonition box (overrides `callout`) |
+| `callout_warning` | Warning admonition box (overrides `callout`) |
+| `callout_note` | Note admonition box (overrides `callout`) |
+| `callout_important` | Important admonition box (overrides `callout`) |
+| `callout_example` | Example admonition box (overrides `callout`) |
 | `cover_title` | Cover page title |
 | `cover_subtitle` | Cover page subtitle |
 | `cover_author` | Cover page author byline |
@@ -112,6 +113,22 @@ footer:
 | `false` | No rule (header default) |
 
 `rule: inline` with `center` content falls back to `above` (footer) or `below` (header) automatically.
+
+**Position** — override the default vertical position with `top` (header) or `bottom` (footer):
+
+```yaml
+header:
+  left: "{chapter}"
+  right: "{page}"
+  top: 0.2in
+
+footer:
+  left: "{title}"
+  right: "{page}"
+  bottom: 0.35in
+```
+
+The defaults are `0.45in` for both.
 
 The cover page always suppresses both header and footer.
 
