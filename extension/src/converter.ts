@@ -193,7 +193,7 @@ body {
   line-height: 1.75;
   color: var(--color-text);
   margin-bottom: 0.18in;
-  text-align: justify;
+  text-align: left;
   hyphens: auto;
 }
 /* Extra bottom margin on first paragraph to clear space below the drop cap */
@@ -682,6 +682,7 @@ const STYLE_SELECTORS: Record<string, string | string[]> = {
     '.page:not(.cover) .admonition.example .admonition-title',
   ],
   // Cover
+  cover:             '.cover',
   cover_title:       '.cover h1',
   cover_subtitle:    '.cover h2',
   cover_author:      '.cover .author',
