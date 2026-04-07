@@ -411,6 +411,7 @@ body {
   padding: 0.01in 0.05in;
   border-radius: 2px;
   border: 1px solid #ddd5c8;
+  font-variant-ligatures: none;
 }
 
 /* Code blocks */
