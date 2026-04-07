@@ -285,18 +285,23 @@ Enter a nix development shell:
 nix develop
 ```
 
+### When *not* on WSL:
+
 Build the `.vsix` file:
 
 ```bash
-npm run compile
-vsce package
+npm run build
 ```
+
+(Look at package.json, and you'll see that this compiles and then runs `vsce package`.)
 
 Install it in VS Code:
 
 ```bash
 code --install-extension md2book-preview-0.0.1.vsix
 ```
+
+### When in WSL
 
 Or from inside VS Code: Command Palette → "Extensions: Install from VSIX..." and pick the file.
 
@@ -313,6 +318,8 @@ From then on:
 ```
 cp md2book*.vsix /mnt/c/Users/jeffc/vsextensions/
 ```
+
+(We also provide in package.json a script called build_wsl that you can check out that builds and copies; you'll need to update the username.)
 
 And then to switch back to Windows to install:
 
