@@ -62,7 +62,9 @@
   "scripts": {
     "compile": "tsc -p ./",
     "build": "tsc -p ./ ; vsce package",
+    "inst": "code --install-extension md2book-preview-0.0.1.vsix",
     "build_wsl": "tsc -p ./ ; vsce package ; cp md2book*.vsix /mnt/c/Users/jeffc/vsextensions/",
+    "inst_wsl": "",
     "watch": "tsc -watch -p ./",
     "package": "npx @vscode/vsce package"
   },
