@@ -78,6 +78,7 @@ function openPreview() {
     panel = undefined;
   });
 
+  registerOverflowHandler(panel);
   refreshPreview(editor.document);
 }
 
@@ -90,12 +91,25 @@ function refreshPreview(document: vscode.TextDocument) {
   const baseDir = path.dirname(document.uri.fsPath);
 
   try {
-    const html = convert(source, { baseDir });
+    const html = convert(source, { baseDir, overflowCheck: true });
     panel.webview.html = html;
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     panel.webview.html = errorPage(msg);
   }
+}
+
+// ── Overflow message handler ──────────────────────────────────────────────────
+
+function registerOverflowHandler(p: vscode.WebviewPanel) {
+  p.webview.onDidReceiveMessage((msg) => {
+    if (msg.type !== 'overflow') return;
+    const pages: number[] = msg.pages;
+    const label = pages.length === 1
+      ? `md2book: Page ${pages[0]} overflows`
+      : `md2book: Pages ${pages.join(', ')} overflow`;
+    vscode.window.showWarningMessage(`⚠ ${label} — content will be clipped. Add a <!-- pagebreak --> to split the page.`);
+  });
 }
 
 // ── Export to browser ────────────────────────────────────────────────────────
