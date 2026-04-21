@@ -52,6 +52,8 @@ export interface ConvertOptions {
   baseDir?: string;
   /** Override any front-matter fields */
   overrides?: Partial<BookMeta>;
+  /** Inject overflow-detection script (for the VS Code webview preview) */
+  overflowCheck?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -620,11 +622,35 @@ body {
   font-size: 1.1em;
 }
 
+/* Overflow warning — shown in preview only, not in print */
+.page.overflow {
+  outline: 3px solid #e03030;
+  outline-offset: -3px;
+}
+.page.overflow::after {
+  content: '⚠ overflow';
+  position: absolute;
+  bottom: 0.2in;
+  right: 0.2in;
+  background: #e03030;
+  color: #fff;
+  font-family: sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  z-index: 100;
+}
+
 @media print {
   @page { size: 6in 9in; margin: 0; }
   body { background: none; padding: 0; gap: 0; }
   .page { box-shadow: none; break-after: page; page-break-after: always; }
   .page:last-child { break-after: avoid; page-break-after: avoid; }
+  .page.overflow { outline: none; }
+  .page.overflow::after { display: none; }
 }`;
 }
 
@@ -1041,7 +1067,7 @@ ${indentedLines.join("\n")}${headerHtml}${footerHtml}
  * complete, self-contained HTML book.
  */
 export function convert(source: string, options: ConvertOptions = {}): string {
-  const { baseDir, overrides = {} } = options;
+  const { baseDir, overrides = {}, overflowCheck = false } = options;
 
   const cleaned = cleanEscapes(source);
   const { meta, body } = parseFrontMatter(cleaned);
@@ -1107,6 +1133,19 @@ ${pagesHtml}
       ],
       throwOnError: false
     });
+    ${overflowCheck ? `
+    // Overflow detection — report overflowing pages back to the VS Code extension
+    const vscode = acquireVsCodeApi();
+    const overflowing = [];
+    document.querySelectorAll('.page:not(.cover)').forEach((page, i) => {
+      if (page.scrollHeight > page.clientHeight) {
+        page.classList.add('overflow');
+        overflowing.push(i + 1);
+      }
+    });
+    if (overflowing.length > 0) {
+      vscode.postMessage({ type: 'overflow', pages: overflowing });
+    }` : ''}
   });
 </script>
 </body>
