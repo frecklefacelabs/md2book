@@ -918,22 +918,22 @@ function buildCover(
   overrides: Partial<BookMeta>,
   imageUri?: string | null
 ): string {
-  const title = overrides.title || meta.title || "Untitled";
+  const title    = overrides.title    || meta.title    || "";
   const subtitle = overrides.subtitle || meta.subtitle || "";
-  const blurb = overrides.blurb || meta.blurb || "";
-  const author = overrides.author || meta.author || "";
+  const blurb    = overrides.blurb    || meta.blurb    || "";
+  const author   = overrides.author   || meta.author   || "";
 
   const styleAttr = imageUri
     ? ` style="background-image: url('${imageUri}')"`
     : "";
 
   return `  <div class="page cover"${styleAttr}>
-    <h1>${title}</h1>
-    <h2>${subtitle}</h2>
+${title    ? `    <h1>${title}</h1>\n`              : ''}\
+${subtitle ? `    <h2>${subtitle}</h2>\n`           : ''}\
     <div class="divider"></div>
     <div class="spacer"></div>
-    <p class="blurb">${blurb}</p>
-    <span class="author">${author}</span>
+${blurb  ? `    <p class="blurb">${blurb}</p>\n`   : ''}\
+${author ? `    <span class="author">${author}</span>\n` : ''}\
   </div>`;
 }
 
