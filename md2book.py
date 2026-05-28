@@ -844,11 +844,12 @@ def process_math(html):
 
 
 def clean_escapes(text):
-    """Remove backslash escapes before non-Markdown characters.
-    Google Drive's markdown export is overly cautious and escapes characters
-    like = : > that have no special meaning in Markdown."""
-    markdown_specials = r'\*_{}[]()#+-.!|`'
-    return re.sub(r'\\([^' + re.escape(markdown_specials) + r'])', r'\1', text)
+    """Strip backslash escapes that Google Drive's markdown export adds to
+    characters with no special meaning in Markdown (e.g. = : > <).
+    Deliberately narrow: backslashes before letters must survive so LaTeX
+    commands like \\frac and \\sqrt reach KaTeX intact."""
+    over_escaped = r'=:><'
+    return re.sub(r'\\([' + re.escape(over_escaped) + r'])', r'\1', text)
 
 
 def parse_front_matter(text):

@@ -68,11 +68,11 @@ interface MarginOptions {
 }
 
 function buildGoogleFontsImport(fontNames: string[]): string {
-  if (!fontNames || fontNames.length === 0) return '';
+  if (!fontNames || fontNames.length === 0) return "";
   const families = fontNames.map(
-    (name) => `family=${name.replace(/ /g, '+')}:ital,wght@0,400;0,700;1,400`
+    (name) => `family=${name.replace(/ /g, "+")}:ital,wght@0,400;0,700;1,400`,
   );
-  const url = `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`;
+  const url = `https://fonts.googleapis.com/css2?${families.join("&")}&display=swap`;
   return `@import url('${url}');`;
 }
 
@@ -81,7 +81,7 @@ function bookCss(
   margins: MarginOptions,
   fontHeading: string,
   fontBody: string,
-  fontCode: string
+  fontCode: string,
 ): string {
   return `
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
@@ -660,65 +660,62 @@ body {
 
 const STYLE_SELECTORS: Record<string, string | string[]> = {
   // Interior page
-  h1:                '.page:not(.cover) h1',
-  h2:                '.page:not(.cover) h2',
-  h3:                '.page:not(.cover) h3',
-  h4:                '.page:not(.cover) h4',
-  h5:                '.page:not(.cover) h5',
-  body_text:         '.page:not(.cover) p',
+  h1: ".page:not(.cover) h1",
+  h2: ".page:not(.cover) h2",
+  h3: ".page:not(.cover) h3",
+  h4: ".page:not(.cover) h4",
+  h5: ".page:not(.cover) h5",
+  body_text: ".page:not(.cover) p",
   blockquote: [
-    '.page:not(.cover) blockquote',
-    '.page:not(.cover) blockquote p',
+    ".page:not(.cover) blockquote",
+    ".page:not(.cover) blockquote p",
   ],
-  link:              '.page:not(.cover) a',
-  code_inline:       '.page:not(.cover) code',
-  code_block: [
-    '.page:not(.cover) pre',
-    '.page:not(.cover) pre code',
-  ],
+  link: ".page:not(.cover) a",
+  code_inline: ".page:not(.cover) code",
+  code_block: [".page:not(.cover) pre", ".page:not(.cover) pre code"],
   // Admonitions — arrays so child text elements are also targeted,
   // which is necessary to override the general `.page:not(.cover) p` font rules.
   callout: [
-    '.page:not(.cover) .admonition',
-    '.page:not(.cover) .admonition p',
-    '.page:not(.cover) .admonition .admonition-title',
+    ".page:not(.cover) .admonition",
+    ".page:not(.cover) .admonition p",
+    ".page:not(.cover) .admonition .admonition-title",
   ],
   callout_tip: [
-    '.page:not(.cover) .admonition.tip',
-    '.page:not(.cover) .admonition.tip p',
-    '.page:not(.cover) .admonition.tip .admonition-title',
+    ".page:not(.cover) .admonition.tip",
+    ".page:not(.cover) .admonition.tip p",
+    ".page:not(.cover) .admonition.tip .admonition-title",
   ],
   callout_warning: [
-    '.page:not(.cover) .admonition.warning',
-    '.page:not(.cover) .admonition.warning p',
-    '.page:not(.cover) .admonition.warning .admonition-title',
+    ".page:not(.cover) .admonition.warning",
+    ".page:not(.cover) .admonition.warning p",
+    ".page:not(.cover) .admonition.warning .admonition-title",
   ],
   callout_note: [
-    '.page:not(.cover) .admonition.note',
-    '.page:not(.cover) .admonition.note p',
-    '.page:not(.cover) .admonition.note .admonition-title',
+    ".page:not(.cover) .admonition.note",
+    ".page:not(.cover) .admonition.note p",
+    ".page:not(.cover) .admonition.note .admonition-title",
   ],
   callout_important: [
-    '.page:not(.cover) .admonition.important',
-    '.page:not(.cover) .admonition.important p',
-    '.page:not(.cover) .admonition.important .admonition-title',
+    ".page:not(.cover) .admonition.important",
+    ".page:not(.cover) .admonition.important p",
+    ".page:not(.cover) .admonition.important .admonition-title",
   ],
   callout_example: [
-    '.page:not(.cover) .admonition.example',
-    '.page:not(.cover) .admonition.example p',
-    '.page:not(.cover) .admonition.example .admonition-title',
+    ".page:not(.cover) .admonition.example",
+    ".page:not(.cover) .admonition.example p",
+    ".page:not(.cover) .admonition.example .admonition-title",
   ],
   // Cover
-  cover:             '.cover',
-  cover_title:       '.cover h1',
-  cover_subtitle:    '.cover h2',
-  cover_author:      '.cover .author',
-  cover_blurb:       '.cover .blurb',
+  cover: ".cover",
+  cover_title: ".cover h1",
+  cover_subtitle: ".cover h2",
+  cover_author: ".cover .author",
+  cover_blurb: ".cover .blurb",
 };
 
 function buildStyleOverrides(styles: Record<string, string>): string {
-  if (!styles || Object.keys(styles).length === 0) return '';
-  const lines = ['/* User style overrides */'];
+  if (!styles || Object.keys(styles).length === 0) return "";
+  const lines = ["/* User style overrides */"];
   for (const [name, props] of Object.entries(styles)) {
     const entry = STYLE_SELECTORS[name];
     if (!entry) continue;
@@ -727,7 +724,7 @@ function buildStyleOverrides(styles: Record<string, string>): string {
       lines.push(`${selector} { ${props} }`);
     }
   }
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -740,7 +737,8 @@ const md = new MarkdownIt({
   highlight: (str, lang) => {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+        return hljs.highlight(str, { language: lang, ignoreIllegals: true })
+          .value;
       } catch (_) {}
     }
     return "";
@@ -751,10 +749,7 @@ const md = new MarkdownIt({
 // Image handling
 // ─────────────────────────────────────────────────────────────────────────────
 
-function loadImageAsDataUri(
-  imageRef: string,
-  baseDir?: string
-): string | null {
+function loadImageAsDataUri(imageRef: string, baseDir?: string): string | null {
   if (!imageRef) return null;
 
   // URL — fetch synchronously is not practical in Node; skip for now.
@@ -848,21 +843,23 @@ function processMath(html: string): string {
   // Block math: $$...$$ — wrap in a div for centering
   html = html.replace(
     /\$\$(.+?)\$\$/gs,
-    (_match, content) => `<div class="math-block">$$${content}$$</div>`
+    (_match, content) => `<div class="math-block">$$${content}$$</div>`,
   );
   // Inline math: $...$ — wrap in a span
   html = html.replace(
     /\$(.+?)\$/g,
-    (_match, content) => `<span class="math-inline">$${content}$</span>`
+    (_match, content) => `<span class="math-inline">$${content}$</span>`,
   );
   return html;
 }
 
 function cleanEscapes(text: string): string {
-  const markdownSpecials = "\\*_{}[]()#+-.!|`";
-  // Remove backslash before characters that aren't markdown-special
+  // Strip backslashes Google Drive's markdown export adds to non-special
+  // characters (= : > <). Deliberately narrow: backslashes before letters
+  // must survive so LaTeX commands like \frac and \sqrt reach KaTeX intact.
+  const overEscaped = "=:><";
   return text.replace(/\\(.)/g, (match, ch) => {
-    return markdownSpecials.includes(ch) ? match : ch;
+    return overEscaped.includes(ch) ? ch : match;
   });
 }
 
@@ -916,24 +913,24 @@ function mdToHtml(mdText: string, baseDir?: string): string {
 function buildCover(
   meta: BookMeta,
   overrides: Partial<BookMeta>,
-  imageUri?: string | null
+  imageUri?: string | null,
 ): string {
-  const title    = overrides.title    || meta.title    || "";
+  const title = overrides.title || meta.title || "";
   const subtitle = overrides.subtitle || meta.subtitle || "";
-  const blurb    = overrides.blurb    || meta.blurb    || "";
-  const author   = overrides.author   || meta.author   || "";
+  const blurb = overrides.blurb || meta.blurb || "";
+  const author = overrides.author || meta.author || "";
 
   const styleAttr = imageUri
     ? ` style="background-image: url('${imageUri}')"`
     : "";
 
   return `  <div class="page cover"${styleAttr}>
-${title    ? `    <h1>${title}</h1>\n`              : ''}\
-${subtitle ? `    <h2>${subtitle}</h2>\n`           : ''}\
+${title ? `    <h1>${title}</h1>\n` : ""}\
+${subtitle ? `    <h2>${subtitle}</h2>\n` : ""}\
     <div class="divider"></div>
     <div class="spacer"></div>
-${blurb  ? `    <p class="blurb">${blurb}</p>\n`   : ''}\
-${author ? `    <span class="author">${author}</span>\n` : ''}\
+${blurb ? `    <p class="blurb">${blurb}</p>\n` : ""}\
+${author ? `    <span class="author">${author}</span>\n` : ""}\
   </div>`;
 }
 
@@ -949,12 +946,12 @@ function renderHfVariables(
   template: string,
   pageNum: number,
   title: string,
-  chapter: string
+  chapter: string,
 ): string {
   if (!template) return "";
   return template
-    .replace(/\{page\}/g,    String(pageNum))
-    .replace(/\{title\}/g,   title   || "")
+    .replace(/\{page\}/g, String(pageNum))
+    .replace(/\{title\}/g, title || "")
     .replace(/\{chapter\}/g, chapter || "");
 }
 
@@ -963,38 +960,48 @@ function buildHfHtml(
   pageNum: number,
   title: string,
   chapter: string,
-  isHeader = false
+  isHeader = false,
 ): string {
-  const cssClass    = isHeader ? "page-header" : "page-footer";
+  const cssClass = isHeader ? "page-header" : "page-footer";
   const defaultRule = isHeader ? "false" : "inline";
 
-  const left   = renderHfVariables(config.left   || "", pageNum, title, chapter);
-  const right  = renderHfVariables(config.right  || "", pageNum, title, chapter);
-  const center = renderHfVariables(config.center || "", pageNum, title, chapter);
+  const left = renderHfVariables(config.left || "", pageNum, title, chapter);
+  const right = renderHfVariables(config.right || "", pageNum, title, chapter);
+  const center = renderHfVariables(
+    config.center || "",
+    pageNum,
+    title,
+    chapter,
+  );
 
   // YAML parses `rule: false` as boolean false
-  let rule: string = (config.rule === false || config.rule === undefined)
-    ? (config.rule === false ? "false" : defaultRule)
-    : String(config.rule);
+  let rule: string =
+    config.rule === false || config.rule === undefined
+      ? config.rule === false
+        ? "false"
+        : defaultRule
+      : String(config.rule);
 
   // rule: inline doesn't make sense with center-only — fall back gracefully
   if (center && rule === "inline") {
     rule = isHeader ? "below" : "above";
   }
 
-  const ruleClass    = rule !== "false" ? ` rule-${rule}` : "";
+  const ruleClass = rule !== "false" ? ` rule-${rule}` : "";
   const positionKey = isHeader ? "top" : "bottom";
   const positionVal = isHeader ? config.top : config.bottom;
-  const styleAttr   = positionVal ? ` style="${positionKey}: ${positionVal}"` : "";
+  const styleAttr = positionVal
+    ? ` style="${positionKey}: ${positionVal}"`
+    : "";
 
   let content: string;
   if (center) {
     content = `<span class="hf-center">${center}</span>`;
   } else {
     const parts: string[] = [];
-    if (left)              parts.push(`<span class="hf-left">${left}</span>`);
+    if (left) parts.push(`<span class="hf-left">${left}</span>`);
     if (rule === "inline") parts.push(`<span class="hf-fill"></span>`);
-    if (right)             parts.push(`<span class="hf-right">${right}</span>`);
+    if (right) parts.push(`<span class="hf-right">${right}</span>`);
     content = parts.join("");
   }
 
@@ -1007,7 +1014,7 @@ function buildPages(
   dropCap = true,
   headerConfig?: HFConfig,
   footerConfig?: HFConfig,
-  title = ""
+  title = "",
 ): string {
   let currentChapter = "";
 
@@ -1020,7 +1027,7 @@ function buildPages(
       if (chapterName) currentChapter = chapterName;
 
       // Check for per-page directives and strip them
-      const hasNoDropCap  = /<!--\s*no-drop-cap\s*-->/.test(pageMd);
+      const hasNoDropCap = /<!--\s*no-drop-cap\s*-->/.test(pageMd);
       const hasAddDropCap = /<!--\s*add-drop-cap\s*-->/.test(pageMd);
       pageMd = pageMd.replace(/<!--\s*no-drop-cap\s*-->\n?/g, "");
       pageMd = pageMd.replace(/<!--\s*add-drop-cap\s*-->\n?/g, "");
@@ -1041,15 +1048,18 @@ function buildPages(
 
       const pageClass = [
         "page",
-        noDropCap    ? "no-drop-cap" : "",
-        headerConfig ? "has-header"  : "",
-      ].filter(Boolean).join(" ");
+        noDropCap ? "no-drop-cap" : "",
+        headerConfig ? "has-header" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
 
       const headerHtml = headerConfig
         ? "\n" + buildHfHtml(headerConfig, pageNum, title, currentChapter, true)
         : "";
       const activeFooter = footerConfig ?? DEFAULT_FOOTER_CONFIG;
-      const footerHtml = "\n" + buildHfHtml(activeFooter, pageNum, title, currentChapter, false);
+      const footerHtml =
+        "\n" + buildHfHtml(activeFooter, pageNum, title, currentChapter, false);
 
       return `  <div class="${pageClass}">
 ${indentedLines.join("\n")}${headerHtml}${footerHtml}
@@ -1074,8 +1084,7 @@ export function convert(source: string, options: ConvertOptions = {}): string {
   const pages = splitPages(body);
 
   // Resolve cover image
-  const imageRef =
-    (overrides.cover_image as string) || meta.cover_image || "";
+  const imageRef = (overrides.cover_image as string) || meta.cover_image || "";
   let imageUri: string | null = null;
   if (imageRef) {
     imageUri = loadImageAsDataUri(imageRef, baseDir);
@@ -1085,29 +1094,55 @@ export function convert(source: string, options: ConvertOptions = {}): string {
     (overrides.accent_color as string) || meta.accent_color || "#8b4513";
 
   const margins: MarginOptions = {
-    marginTop:    (overrides.margin_top    as string) || meta.margin_top    || "0.75in",
-    marginBottom: (overrides.margin_bottom as string) || meta.margin_bottom || "0.75in",
-    marginInner:  (overrides.margin_inner  as string) || meta.margin_inner  || "0.875in",
-    marginOuter:  (overrides.margin_outer  as string) || meta.margin_outer  || "0.75in",
+    marginTop: (overrides.margin_top as string) || meta.margin_top || "0.75in",
+    marginBottom:
+      (overrides.margin_bottom as string) || meta.margin_bottom || "0.75in",
+    marginInner:
+      (overrides.margin_inner as string) || meta.margin_inner || "0.875in",
+    marginOuter:
+      (overrides.margin_outer as string) || meta.margin_outer || "0.75in",
   };
 
-  const dropCap     = overrides.drop_cap ?? meta.drop_cap ?? true;
-  const title        = (overrides.title as string) || meta.title || "Untitled";
-  const headerConfig = (overrides.header || meta.header) as HFConfig | undefined;
-  const footerConfig = (overrides.footer || meta.footer) as HFConfig | undefined;
-  const coverHtml    = buildCover(meta, overrides, imageUri);
-  const pagesHtml    = buildPages(pages, baseDir, dropCap, headerConfig, footerConfig, title);
-  const fontHeading = (overrides.font_heading as string) || meta.font_heading || "'Playfair Display', Georgia, serif";
-  const fontBody    = (overrides.font_body    as string) || meta.font_body    || "'Lora', Georgia, serif";
-  const fontCode    = (overrides.font_code    as string) || meta.font_code    || "'Courier New', Courier, monospace";
-  const googleFonts = (overrides.google_fonts || meta.google_fonts || []) as string[];
-  const userImport  = buildGoogleFontsImport(googleFonts);
-  const styleOverrides = buildStyleOverrides(
-    (overrides.styles || meta.styles || {}) as Record<string, string>
+  const dropCap = overrides.drop_cap ?? meta.drop_cap ?? true;
+  const title = (overrides.title as string) || meta.title || "Untitled";
+  const headerConfig = (overrides.header || meta.header) as
+    | HFConfig
+    | undefined;
+  const footerConfig = (overrides.footer || meta.footer) as
+    | HFConfig
+    | undefined;
+  const coverHtml = buildCover(meta, overrides, imageUri);
+  const pagesHtml = buildPages(
+    pages,
+    baseDir,
+    dropCap,
+    headerConfig,
+    footerConfig,
+    title,
   );
-  const css = (userImport ? userImport + '\n' : '') +
+  const fontHeading =
+    (overrides.font_heading as string) ||
+    meta.font_heading ||
+    "'Playfair Display', Georgia, serif";
+  const fontBody =
+    (overrides.font_body as string) ||
+    meta.font_body ||
+    "'Lora', Georgia, serif";
+  const fontCode =
+    (overrides.font_code as string) ||
+    meta.font_code ||
+    "'Courier New', Courier, monospace";
+  const googleFonts = (overrides.google_fonts ||
+    meta.google_fonts ||
+    []) as string[];
+  const userImport = buildGoogleFontsImport(googleFonts);
+  const styleOverrides = buildStyleOverrides(
+    (overrides.styles || meta.styles || {}) as Record<string, string>,
+  );
+  const css =
+    (userImport ? userImport + "\n" : "") +
     bookCss(accentColor, margins, fontHeading, fontBody, fontCode) +
-    (styleOverrides ? '\n' + styleOverrides : '');
+    (styleOverrides ? "\n" + styleOverrides : "");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1133,7 +1168,9 @@ ${pagesHtml}
       ],
       throwOnError: false
     });
-    ${overflowCheck ? `
+    ${
+      overflowCheck
+        ? `
     // Overflow detection — report overflowing pages back to the VS Code extension
     const vscode = acquireVsCodeApi();
     const overflowing = [];
@@ -1145,7 +1182,9 @@ ${pagesHtml}
     });
     if (overflowing.length > 0) {
       vscode.postMessage({ type: 'overflow', pages: overflowing });
-    }` : ''}
+    }`
+        : ""
+    }
   });
 </script>
 </body>

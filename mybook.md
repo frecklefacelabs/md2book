@@ -124,6 +124,10 @@ For the CSS and image processing logic, the format is
 ## Math Formulas
 ### Testing KaTeX rendering
 
+$$
+\frac{5}{6}
+$$
+
 Here is an inline formula: the famous equation $E = mc^2$ appears right
 in the middle of a sentence without disrupting the text flow.
 

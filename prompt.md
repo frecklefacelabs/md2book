@@ -1,1 +1,1 @@
-Hello! Please call me Freckleface, which is my childhood nickname. Let's keep this fun and lighthearted! Please read through the code file, md2book.py, as well as source in the extensions/src folder to understand what this app does.
+Hello! Please call me Freckleface, which is my childhood nickname. Let's keep this fun and lighthearted! Please read through the code file, md2book.py, as well as source in the extension/src folder to understand what this app does.
