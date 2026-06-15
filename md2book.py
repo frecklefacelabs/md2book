@@ -988,12 +988,17 @@ def build_hf_html(config, page_num, title, chapter, is_header=False):
 
 
 def build_pages(pages, base_dir=None, drop_cap=True,
-                header_config=None, footer_config=None, title=''):
-    """Convert each markdown page chunk to a styled HTML page div."""
-    html_pages = []
-    current_chapter = ''
+                header_config=None, footer_config=None, title='',
+                start_page=1, initial_chapter=''):
+    """Convert each markdown page chunk to a styled HTML page div.
 
-    for i, page_md in enumerate(pages, start=1):
+    Returns (html_string, last_chapter) so multi-file builds can thread
+    the running page number and current chapter name across files.
+    """
+    html_pages = []
+    current_chapter = initial_chapter
+
+    for i, page_md in enumerate(pages, start=start_page):
         # Track chapter name; carry forward when page has no heading
         chapter_name = get_chapter_name(page_md)
         if chapter_name:
@@ -1042,7 +1047,7 @@ def build_pages(pages, base_dir=None, drop_cap=True,
         html_pages.append(
             f'  <div class="{page_class}">\n{indented}{header_html}{footer_html}\n  </div>')
 
-    return '\n'.join(html_pages)
+    return '\n'.join(html_pages), current_chapter
 
 
 def build_html(meta, cover_html, pages_html, overrides):
@@ -1142,6 +1147,25 @@ def main():
         'margin_outer':  args.margin_outer,
     }.items() if v}
 
+    # ── Detect continuation files (mybook.2.md, mybook.3.md, …) ────────────
+    stem         = input_path.stem
+    suffix       = input_path.suffix
+    cont_pattern = re.compile(
+        r'^' + re.escape(stem) + r'\.(\d+)' + re.escape(suffix) + r'$'
+    )
+    cont_files = sorted(
+        ((int(m.group(1)), p)
+         for p in input_path.parent.iterdir()
+         if (m := cont_pattern.match(p.name)) and int(m.group(1)) >= 2),
+        key=lambda x: x[0]
+    )
+
+    if cont_files:
+        numbers = [n for n, _ in cont_files]
+        for expected in range(2, numbers[-1] + 1):
+            if expected not in numbers:
+                print(f"Warning: missing continuation file {stem}.{expected}{suffix}")
+
     # ── Load cover image (local file or URL) ────────────────────────────────
     image_ref = overrides.get('cover_image') or meta.get('cover_image')
     image_uri = load_image_as_data_uri(image_ref, base_dir=input_path.parent)
@@ -1152,16 +1176,46 @@ def main():
     title         = overrides.get('title') or meta.get('title', '')
     header_config = meta.get('header')
     footer_config = meta.get('footer')
-    pages_html    = build_pages(pages, base_dir=input_path.parent, drop_cap=drop_cap,
-                                header_config=header_config, footer_config=footer_config,
-                                title=title)
-    html          = build_html(meta, cover_html, pages_html, overrides)
+
+    build_kwargs = dict(drop_cap=drop_cap, header_config=header_config,
+                        footer_config=footer_config, title=title)
+
+    pages_html_parts = []
+    next_page      = 1
+    last_chapter   = ''
+    total_pages    = len(pages)
+
+    part_html, last_chapter = build_pages(
+        pages, base_dir=input_path.parent,
+        start_page=next_page, initial_chapter=last_chapter, **build_kwargs)
+    pages_html_parts.append(part_html)
+    next_page += len(pages)
+
+    for n, cont_path in cont_files:
+        cont_source = cont_path.read_text(encoding='utf-8')
+        cont_source = clean_escapes(cont_source)
+        _, cont_body = parse_front_matter(cont_source)
+        cont_pages   = split_pages(cont_body)
+        if not cont_pages:
+            print(f"Warning: no pages found in {cont_path.name} — skipping")
+            continue
+        part_html, last_chapter = build_pages(
+            cont_pages, base_dir=cont_path.parent,
+            start_page=next_page, initial_chapter=last_chapter, **build_kwargs)
+        pages_html_parts.append(part_html)
+        next_page   += len(cont_pages)
+        total_pages += len(cont_pages)
+
+    pages_html = '\n'.join(pages_html_parts)
+    html       = build_html(meta, cover_html, pages_html, overrides)
 
     # ── Write output ─────────────────────────────────────────────────────────
     output_path = Path(args.output) if args.output else input_path.with_suffix('.html')
     output_path.write_text(html, encoding='utf-8')
 
-    print(f"✅  {len(pages)} page(s) written to: {output_path}")
+    file_count = 1 + len(cont_files)
+    print(f"✅  {total_pages} page(s) written to: {output_path}"
+          + (f" ({file_count} source files)" if cont_files else ""))
     if meta:
         print(f"    Title:  {meta.get('title', '—')}")
         print(f"    Author: {meta.get('author', '—')}")
