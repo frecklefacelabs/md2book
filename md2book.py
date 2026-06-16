@@ -910,6 +910,7 @@ def build_cover(meta, overrides, image_uri=None):
     author   = overrides.get('author')   or meta.get('author')   or ''
 
     scrim = overrides.get('cover_scrim', meta.get('cover_scrim', True))
+    show_title = overrides.get('cover_show_title', meta.get('cover_show_title', True))
     cover_class = 'page cover' if scrim else 'page cover no-scrim'
 
     style_attr = ''
@@ -917,7 +918,8 @@ def build_cover(meta, overrides, image_uri=None):
         style_attr = f' style="background-image: url(\'{image_uri}\')"'
 
     lines = [f'  <div class="{cover_class}"{style_attr}>']
-    if title:    lines.append(f'    <h1>{title}</h1>')
+    if title and show_title is not False:
+        lines.append(f'    <h1>{title}</h1>')
     if subtitle: lines.append(f'    <h2>{subtitle}</h2>')
     lines.append('    <div class="divider"></div>')
     lines.append('    <div class="spacer"></div>')

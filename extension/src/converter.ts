@@ -45,6 +45,7 @@ export interface BookMeta {
   header?: HFConfig;
   footer?: HFConfig;
   cover_scrim?: boolean;
+  cover_show_title?: boolean;
   [key: string]: unknown;
 }
 
@@ -925,13 +926,14 @@ function buildCover(
   const author = overrides.author || meta.author || "";
 
   const scrim = (overrides.cover_scrim ?? meta.cover_scrim) !== false;
+  const showTitle = (overrides.cover_show_title ?? meta.cover_show_title) !== false;
   const coverClass = scrim ? "page cover" : "page cover no-scrim";
   const styleAttr = imageUri
     ? ` style="background-image: url('${imageUri}')"`
     : "";
 
   return `  <div class="${coverClass}"${styleAttr}>
-${title ? `    <h1>${title}</h1>\n` : ""}\
+${title && showTitle ? `    <h1>${title}</h1>\n` : ""}\
 ${subtitle ? `    <h2>${subtitle}</h2>\n` : ""}\
     <div class="divider"></div>
     <div class="spacer"></div>
